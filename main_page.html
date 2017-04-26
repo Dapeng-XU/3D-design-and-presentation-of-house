@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 不建议用户使用页面缩放，Bootstrap推荐，也适合我们的项目 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>家居设计</title>
+    <script type="text/javascript" src="third-party/jquery/jquery.js"></script>
+    <script type="text/javascript" src="third-party/three.js/three.js"></script>
+    <script type="text/javascript" src="third-party/three.js/OBJLoader.js"></script>
+    <script type="text/javascript" src="third-party/three.js/MTLLoader.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/style.css">
+    <link rel="stylesheet" type="text/css" href="style/login.css">
+</head>
+<body>
+    <div id="left_panel">
+        <!--300px*300px是一个预设值，仅用于调试。在main_frame.js脚本中，页面加载完毕和窗口大小改变时会更改-->
+        <canvas id="canvas"></canvas>
+        <!--canvas和div的样式定义写在style.css中-->
+        <div id="title_text">3D室内家居设计</div>
+        <div id="instruction_text">
+            <p>欢迎体验！</p>
+
+            <br/>
+            <p>操作说明：</p>
+            <p><span class="key">C</span>切换观察视角</p>
+            <p><span class="key">M</span>显示/隐藏侧边栏</p>
+            <p><span class="key">P</span>播放/停止动画</p>
+            <p><span class="key">X</span><span class="key">滚轮上滚</span>放大选定对象</p>
+            <p><span class="key">Z</span><span class="key">滚轮下滚</span>缩小选定对象</p>
+            <p><span class="key">Delete</span>删除选定对象</p>
+            <p><span class="key">Esc</span>开启/关闭使用鼠标选定对象</p>
+            <p>鼠标拖动对象以改变位置</p>
+            <p><span class="key">H</span>还可查看详细帮助呦~</p>
+        </div>
+        <div id="qilusoft_text">齐鲁软件大赛参赛作品</div>
+        <div id="debug_text">调试输出</div>
+        <div id="popup_text">弹出提示</div>
+    </div>
+    <div id="right_panel">
+        <div id="cselect" class="choice-selector">选择菜单的内容：</div>
+        <div id="list_1" class="right-panel-list" style="visibility: visible;">
+            <!--要想切换元素是否显示在屏幕上，可以通过修改CSS的display属性来实现，具体是在none和block之间进行切换。-->
+            <!-- TODO: 增加不同列表的切换功能，以便实现对光源的列表式管理 -->
+            <div id="ctitle" class="choice-title">操作名称</div>
+            <div id="cinst" class="choice-instruction" style="display: none;">操作说明</div>
+            <ul id="clist" class="choice-list">
+                <li>
+                    <!-- TODO: 在这里为每一种元素添加图标 -->
+                    <p>{{item.name}}</p>
+                </li>
+            </ul>
+        </div>
+        <div id="list_2" class="right-panel-list"></div>
+    </div>
+    <div id="background-overlay-layer"></div>
+
+    <div id="docs" class="overlay-layer">
+        <div id="docs-text" class="overlay-layer-text">
+            <h3>使用说明</h3>
+            <p>按下M键显示侧边栏，在侧边栏最上端可以选择菜单内容：</p>
+            <p>添加家具：选择所要添加的家具后，在3D视角中点击鼠标左键，安放家具，还可以通过鼠标滚轮调整家具大小。在3D视角中ESC开启关闭鼠标选定对象。</p>
+            <p>添加光源：与添加家具的方法相同。</p>
+            <p>设置场景：可以在这里对场景的各个参数进行调整。</p>
+            <p>设置光源：可以在这里对光源的各个参数进行调整。</p>
+            <p>在3D视角中按P键可以暂停/开始播放动画。</p>
+            <p>在3D视角中ESC开启关闭鼠标选定对象。</p>
+            <p>在3D视角中按下Delete可以删除指定对象。</p>
+            <br />
+            <p>另外，如遇任何问题，请尝试直接刷新页面。侧边栏出错，请尝试切换不同的侧边页面，然后切换回去。</p>
+            <br />
+            <p>现在，你可以来布置你温馨的小家了！</p>
+            <br />
+            <div id="newField"></div>
+        </div>
+    </div>
+    <!--凡操作DOM的JavaScript脚本，要么放在<body>的末尾，要么使用body onload，再者就是jQuery的ready事件-->
+    <script type="text/javascript" src="js/main_frame.js"></script>
+</body>
+</html>

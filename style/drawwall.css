@@ -1,0 +1,82 @@
+.panel-success {
+    margin-top: 10px;
+    margin-left: 10px;
+    width: 280px;
+    height: auto;
+    float: left;
+}
+
+.panel-body img {
+    width: 80px;
+    height: 80px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.roomType img {
+    width: 70px;
+    height: 70px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.panel-body img:hover {
+    border: solid #6BCDDA 2px;
+    cursor: pointer;
+}
+
+.skin {
+    width: 100px;
+    border: 1px solid gray;
+    padding: 2px;
+    visibility: hidden;
+    position: absolute;
+}
+
+div.items {
+    margin: 1px 0;
+}
+
+div.items a {
+    text-decoration: none;
+}
+
+div.items:hover {
+    background-color: #c0c0c0;
+    cursor: default;
+}
+
+#canvasId {
+    float: right;
+    border: 3px solid #b2dba1;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+#tip4length {
+    float: left;
+    margin-top: 10px;
+    width: 130px;
+    height: auto;
+}
+
+#board {
+    width: 800px;
+    height: 500px;
+    float: left;
+    margin-left: 20px;
+}
+
+#canvasId {
+    width: 800px;
+    height: 500px;
+}
+
+#next {
+    margin-left: auto;
+    font-size: large;
+}
+
+#page-header {
+    background-color: #b2dba1
+}

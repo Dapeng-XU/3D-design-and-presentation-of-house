@@ -1,0 +1,19 @@
+{
+  "filetype": "pagedata",
+  "operation": "set-parameter",
+  "content": {
+    "title": "俯视图视角的相机",
+    "items": [
+      {
+        "chsname": "视野宽度",
+        "typename": "configuration",
+        "datatype": "number",
+        "min": 1,
+        "max": 1000,
+        "step": 0.1,
+        "precision": 1,
+        "varible": "cameraParameter.top.width"
+      }
+    ]
+  }
+}

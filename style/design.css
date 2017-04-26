@@ -1,0 +1,89 @@
+.panel-success {
+    margin-top: 10px;
+    margin-left: 10px;
+    width: 280px;
+    height: auto;
+    float: left;
+}
+.panel-body img{
+    width: 80px;
+    height: 80px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+.roomType img{
+    width: 70px;
+    height: 70px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+.panel-body img:hover{
+    border: solid #6BCDDA 2px;
+    cursor: pointer;
+}
+.skin {
+    background-color: #f0f0f0;
+    background-image: -webkit-gradient(linear,left top, left bottom,from(#fefefe), color-stop(0.5,#f0f0f0), color-stop(0.51, #e6e6e6));
+    background-image: -moz-linear-gradient(#fefefe 0%, #f0f0f0 50%, #e6e6e6 51%);
+    background-image: -o-linear-gradient(#fefefe 0%, #f0f0f0 50%, #e6e6e6 51%);
+    background-image: -ms-linear-gradient(#fefefe 0%, #f0f0f0 50%, #e6e6e6 51%);
+    background-image: linear-gradient(#fefefe 0%, #f0f0f0 50%, #e6e6e6 51%);
+    width : 80px;
+    border : 1px solid #b2dba1;
+    padding : 2px;
+    visibility : hidden;
+    position : absolute;
+    text-align: center;
+    box-shadow: 1px -1px 0 rgba(255, 255, 255, 0.6) inset;
+    -moz-box-shadow: 1px -1px 0 rgba(255, 255, 255, 0.6) inset;
+    -webkit-box-shadow: 1px -1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+.skin:hover{
+    overflow:hidden;
+    position:absolute;
+    opacity:0.9;
+    /* Gradients! */
+    background-image:-webkit-gradient(linear, left top, right top, from(rgba(168,168,168,0.5)),color-stop(0.5,rgba(168,168,168,0)), to(rgba(168,168,168,0.5)));
+    background-image:-moz-linear-gradient(left, rgba(168,168,168,0.5), rgba(168,168,168,0) 50%, rgba(168,168,168,0.5));
+    background-image:-o-linear-gradient(left, rgba(168,168,168,0.5), rgba(168,168,168,0) 50%, rgba(168,168,168,0.5));
+    background-image:-ms-linear-gradient(left, rgba(168,168,168,0.5), rgba(168,168,168,0) 50%, rgba(168,168,168,0.5));
+    background-image:linear-gradient(left, rgba(168,168,168,0.5), rgba(168,168,168,0) 50%, rgba(168,168,168,0.5));
+    /* Creating borders with box-shadow. Useful, as they don't affect the size of the element. */
+    box-shadow:-1px 0 0 #a3a3a3,-2px 0 0 #fff,1px 0 0 #a3a3a3,2px 0 0 #fff;
+    -moz-box-shadow:-1px 0 0 #a3a3a3,-2px 0 0 #fff,1px 0 0 #a3a3a3,2px 0 0 #fff;
+    -webkit-box-shadow:-1px 0 0 #a3a3a3,-2px 0 0 #fff,1px 0 0 #a3a3a3,2px 0 0 #fff;
+    /* This will create a smooth transition for the opacity property */
+    -moz-transition:0.25s all;
+    -webkit-transition:0.25s all;
+    -o-transition:0.25s all;
+    transition:0.25s all;
+}
+
+div.items {
+    margin : 1px 0;
+}
+div.items a {
+    text-decoration : none;
+}
+div.items:hover {
+    background-color : #c0c0c0;
+    cursor: default;
+}
+#canvasId{
+    left: 300px;
+    float: left;
+    border: 3px solid #b2dba1;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+#tip {
+    left: 1120px;
+    width: 140px;
+    height: auto;
+}
+#page {
+    width: 1300px;
+    height: 700px;
+    overflow-x: auto;
+    overflow-y: auto;
+}

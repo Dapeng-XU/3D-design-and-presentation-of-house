@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>家居设计</title>
+    <script src="third-party/jquery/jquery.js"></script>
+    <link rel="stylesheet" href="third-party/bootstrap/bootstrap.css">
+    <script src="third-party/bootstrap/bootstrap.js"></script>
+    <link rel="stylesheet" href="style/design.css">
+</head>
+<body>
+<div id="page">
+    <div id="container">
+        <a id="next" class="btn btn-default" href="main_page.html" style="right:130px;position: fixed;top:0;">进入3D设计界面</a>
+        <button class="btn btn-info" data-toggle="modal" data-target="#myModal"style="right:40px;position: fixed;top:0;">
+            使用帮助
+        </button>
+        <div style="background-image: url(images/head2.png);width: 1300px;height: 100px;"></div>
+        <hr>
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h3 class="panel-title">户型设计</h3>
+            </div>
+            <div class="panel-body">
+                <div class="draw">
+                    <p>画户型(右键点击#后退#重做#完成)</p>
+                    <img id="wallId"src="images/wall.png" class="img-thumbnail" title="画墙">
+                    <img id="roomId"src="images/room.png" class="img-thumbnail" title="画房间">
+                    <img id="doorId"src="images/door.png" class="img-thumbnail"title="画门">
+                    <img id="windowId"src="images/window.png" class="img-thumbnail"title="画窗">
+                </div>
+                <hr>
+                <div class="roomType">
+                    <p>选择户型(点击户型显示)</p>
+                    <img id="room_0"src="images/room_0.png" class="img-thumbnail"title="户型1">
+                    <img id="room_1"src="images/room_1.png" class="img-thumbnail"title="户型2">
+                    <img id="room_2"src="images/room_2.png" class="img-thumbnail"title="户型3">
+                    <img id="room_3"src="images/room_3.png" class="img-thumbnail"title="户型4">
+                    <img id="room_4"src="images/room_4.png" class="img-thumbnail"title="户型5">
+                    <img id="room_5"src="images/room_5.png" class="img-thumbnail"title="户型6">
+                </div>
+            </div>
+        </div>
+        <div id="board">
+            <canvas id='canvasId' class="canvas" width="800px"height="500px"></canvas>
+            <div id="menu" class="skin">
+                <div id="back" class="items">
+                    <a>后退</a>
+                </div>
+                <div id="redo" class="items">
+                    <a>重做</a>
+                </div>
+                <div id="finish" class="items">
+                    <a>完成</a>
+                </div>
+            </div>
+
+        </div>
+        <div id="tip" class="panel panel-success">
+            <div class="panel-heading">
+                <p class="panel-title">
+                    房间参数(/m)：
+                </p>
+            </div>
+            <div class="panel-body">
+                <div class="input-group">
+                    <p>房间名称：</p>
+                    <input id="name" type="text" class="form-control" placeholder="我的房间">
+                </div>
+                <div class="input-group">
+                    <p>房间高度：</p>
+                    <input id="room_h" type="text" class="form-control" placeholder="2.8">
+                </div>
+                <div class="input-group">
+                    <p>门高度：</p>
+                    <input id="door_h" type="text" class="form-control" placeholder="2.1">
+                </div>
+                <div class="input-group">
+                    <p>窗户下端高度：</p>
+                    <input id="window_l" type="text" class="form-control" placeholder="0.9">
+                </div>
+                <div class="input-group">
+                    <p>窗户上端高度：</p>
+                    <input id="window_h" type="text" class="form-control" placeholder="2.4">
+                </div>
+                <div class="input-group">
+                    <p>比例尺：</p>
+                    <input id="scale" type="number" class="form-control" min="0.5" max="1.1" step="0.01" value="1">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer style="text-align: center">@齐鲁软件大赛作品</footer>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    使用帮助
+                </h4>
+            </div>
+            <div class="modal-body">
+                #户型设计：可以自己设计户型，选择【画墙（直线）】，【画房间（矩形）】，画【门窗】。<br>
+                #右键点击：点击【完成】之后不可继续绘制，点击画图工具可以继续绘制。<br>
+                #选择户型：有6种户型可供选择。<br>
+                #房间参数：右边栏设置房间高度等参数，单位（米）。<br>
+                #比例尺  ：默认一个网格表示1米。<br>
+                #设计完成：点击【进入3D设计页面】。<br>
+                #跳过设计：直接进入3D界面，默认户型为户型1。
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/canvas_WallS.js"></script>
+</body>
+</html>

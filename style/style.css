@@ -1,0 +1,275 @@
+
+/* 现代艺术馆  【使用】
+ * http://www.peise.net/2014/0222/4112.html
+ * 棕褐    #B87348
+ * 桃红    #F9957D
+ * 浅橄榄  #DFEBB7
+ * 冰蓝    #D0F3F7
+ * 海水蓝  #6BCDDA
+ */
+
+/* 橄榄色家居
+ * http://www.peise.net/2012/1227/2655.html
+ * 炭灰色  #14162B
+ * 月白    #EBE3E0
+ * 浅橄榄  #CACA8C
+ * 橄榄    #BDC264
+ * 深橄榄  #A6A823
+ */
+
+/* 带有山大红的英伦风
+ * 山大红  #930D14
+ * 红      #BD5437
+ * 深灰    #91918D
+ * 浅灰    #E6E4DA
+ * 瓷白    #FFFFFF
+ */
+
+#title_text {
+    position: absolute; /*使用绝对位置实现对canvas的覆盖显示。*/
+    left: 30px;
+    top: 30px;
+    padding: 5px;
+    background-color: #FFFFFF;
+    color: #B87348;
+    border: solid;
+    border-width: 3px;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+#instruction_text {
+    position: absolute;
+    left: 30px;
+    top: 100px;
+    padding: 5px;
+    background-color: #DFEBB7;
+    fill-opacity: 0.75;
+    color: #101010;
+    border: dashed;
+    border-width: 2px;
+    font-size: 80%;
+    line-height: 40%;
+    opacity: 0.6;
+}
+
+#qilusoft_text {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    color: #006400;
+    font-style: italic;
+}
+
+#debug_text {
+    position: absolute;
+    right: 20%;
+    bottom: 0px;
+    color: #0f0f0f;
+    max-height: 50%;
+    font-size: 33%;
+    text-align: center;
+    overflow: hidden;
+}
+
+body {
+    margin: 0px;
+    border: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+}
+
+.key {
+    padding-bottom: 2px;
+    padding-top: 2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 7px;
+    font-weight: bold;
+    background-color: #CEC3C0;
+    color: #000000;
+}
+
+#left_panel {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 70%;
+    height: 100%;
+}
+
+/*将选择面板从左侧移动到右侧之后，需要重新手动定位dat.gui组件的位置。*/
+#dat_gui {
+    position: relative;
+    /* left会在脚本中被重置，故此处仅作初始化，其数值没有实际意义 */
+    left: 0px;
+    top: 0px;
+}
+
+#right_panel {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 30%;
+    height: 100%;
+    border-left: solid;
+    border-left-width: medium;
+    border-left-color: #F9957D;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+/*选择面板选择框*/
+.choice-selector {
+    background-color: #B87348;
+    color: #FBF3F0;
+    font-size: 66%;
+    padding: 10px;
+    border-bottom: solid;
+    border-bottom-color: #FBF3F0;
+    border-bottom-width: thin;
+}
+
+/*选择面板标题栏*/
+.choice-title {
+    background-color: #B87348;
+    color: #FBF3F0;
+    font-size: 200%;
+    font-weight: bold;
+    padding: 10px;
+    padding-left: 20px;
+    display: block;
+}
+
+/*选择面板说明框*/
+.choice-instruction {
+    border-color: #B87348;
+    border-width: 20px;
+    border-top-width: 8px;
+    border-style: solid;
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #E1896A;
+    color: #FFFFFF;
+    font-weight: 200;
+    font-size: 80%;
+    display: block;
+}
+
+/*选择面板列表*/
+.choice-list {
+    list-style: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 0px;
+}
+.choice-list li{
+    /*margin-top: 12px;*/
+    /*margin-bottom: 12px;*/
+    background-color: #FFFFFF;
+    border-style: dashed;
+    border-color: #FDE2DC;
+    margin: 20px;
+}
+.choice-list li img{
+    width: 66%;
+    padding-left: 17%;
+    padding-right: 17%;
+    padding-top: 14px;
+    padding-bottom: 2px;
+}
+.choice-list li p{
+    padding-top: 2px;
+    padding-bottom: 4px;
+    text-align: center;
+    font-size: 75%;
+}
+.choice-list li input{
+    margin-left: 25px;
+    margin-bottom: 10px;
+    padding-top: 2px;
+    padding-bottom: 4px;
+    text-align: center;
+    font-size: 90%;
+}
+.choice-list li:nth-child(even){
+    background-color: #F4F3EE;
+}
+.choice-list li:hover{
+    background-color: #D0F3F7;
+    /*border-radius: 10px;*/
+}
+.choice-list li:active{
+    background-color: #6BCDDA;
+}
+
+/*覆盖层*/
+.overlay-layer {
+    visibility: hidden;
+    position: absolute;
+    opacity: 0.80;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: #0f0f0f;
+}
+/*覆盖层文本*/
+.overlay-layer-text {
+    position: absolute;
+    box-sizing: content-box;
+    margin-top: 60px;
+    margin-left: 0px;
+    margin-right: 0px;
+    border-radius: 15px;
+    background-color: #F4F3EE;
+    overflow: scroll;
+    /*overflow-x: hidden;*/
+    /*以下的六个量仅作初始化，在脚本中会动态调整*/
+    left: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    width: 0px;
+}
+/*覆盖层文本标题*/
+.overlay-layer-text h3 {
+    text-align: center;
+    font-weight: bold;
+}
+
+/*登录注册*/
+#login-text {
+
+}
+
+#popup_text {
+    display: none;
+    position: absolute;
+    font-size: large;
+    width: 40%;
+    text-align: center;
+    padding: 20px;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 2em 1em #DFEBB7;
+}
+
+#background-overlay-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
+    background-color: #ffffff;
+    opacity: 0;
+}

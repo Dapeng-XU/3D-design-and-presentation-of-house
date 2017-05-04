@@ -1,3 +1,26 @@
+A WebGL-based system for the 3D design and presentation of house
+*   Implement two core functions: drawing the room layout and putting furnishings as you want.
+*   In the lightweight framework, the system provide the visiting and designing views for users, and the
+interfaces to modify the furnishings and set theirs properties for developers.
+*   It is written in JavaScript, assembling several front-end technologies, and the graphics part of this
+system is implemented by WebGL and Three.js.
+*   Got the first prize in the 14th Qilu Undergraduate Software Contest
+
+基于 WebGL 的 3D 智能家居设计系统
+*   实现了两大核心功能： 户型设计和家居布置。
+*   在轻量级的框架内，系统提供了面向用户的游览和设计视图，以及面向开发商的家具修改和属
+*   性设置接口。
+*   使用 JavaScript 编写，融合了多种前端技术，系统的图形部分使用 WebGL 和 Three.js 实现。
+*   获得齐鲁大学生软件大赛一等奖。
+
+
+
+
+
+
+
+
+
 #homedesign
 
 ###文件目录说明

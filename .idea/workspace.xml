@@ -35,21 +35,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="main_frame.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="main_frame.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main_frame.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="888">
-              <caret line="283" column="31" selection-start-line="283" selection-start-column="31" selection-end-line="283" selection-end-column="31" />
+            <state relative-caret-position="320">
+              <caret line="2207" column="27" selection-start-line="2207" selection-start-column="24" selection-end-line="2207" selection-end-column="27" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="light-configure.json" pinned="false" current-in-tab="true">
+      <file leaf-file-name="light-configure.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/json/pagedata/light-configure.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="7" column="42" selection-start-line="7" selection-start-column="42" selection-end-line="7" selection-end-column="42" />
+            <state relative-caret-position="228">
+              <caret line="12" column="21" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -542,14 +542,7 @@
       <workItem from="1493904935438" duration="397000" />
       <workItem from="1493905592111" duration="570000" />
       <workItem from="1493907352259" duration="911000" />
-      <workItem from="1493998842053" duration="2854000" />
-    </task>
-    <task id="LOCAL-00082" summary="如果对象被过度移动，将自动删除这个对象。此次也修改了部分注释。">
-      <created>1472493837325</created>
-      <option name="number" value="00082" />
-      <option name="presentableId" value="LOCAL-00082" />
-      <option name="project" value="LOCAL" />
-      <updated>1472493837325</updated>
+      <workItem from="1493998842053" duration="3161000" />
     </task>
     <task id="LOCAL-00083" summary="版本合并">
       <created>1472494790096</created>
@@ -887,11 +880,18 @@
       <option name="project" value="LOCAL" />
       <updated>1494001449344</updated>
     </task>
-    <option name="localTasksCounter" value="131" />
+    <task id="LOCAL-00131" summary="Change the directional lights.">
+      <created>1494001725008</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1494001725008</updated>
+    </task>
+    <option name="localTasksCounter" value="132" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="596799000" />
+    <option name="totallyTimeSpent" value="597106000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -957,7 +957,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="增加对对象是否可以缩放的判断" />
     <MESSAGE value="增加环境光的光照设置&#10;" />
     <MESSAGE value="初步增加环境光源" />
     <MESSAGE value="解除对dat.gui的依赖" />
@@ -982,7 +981,8 @@
     <MESSAGE value="Change the tips and ceiling." />
     <MESSAGE value="Change the tips." />
     <MESSAGE value="Change the tips again." />
-    <option name="LAST_COMMIT_MESSAGE" value="Change the tips again." />
+    <MESSAGE value="Change the directional lights." />
+    <option name="LAST_COMMIT_MESSAGE" value="Change the directional lights." />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.8510029" />
   </component>
   <component name="XDebuggerManager">
@@ -1283,18 +1283,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/main_frame.js">
+    <entry file="file://$PROJECT_DIR$/json/pagedata/light-configure.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="888">
-          <caret line="283" column="31" selection-start-line="283" selection-start-column="31" selection-end-line="283" selection-end-column="31" />
+        <state relative-caret-position="228">
+          <caret line="12" column="21" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/json/pagedata/light-configure.json">
+    <entry file="file://$PROJECT_DIR$/js/main_frame.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" column="42" selection-start-line="7" selection-start-column="42" selection-end-line="7" selection-end-column="42" />
+        <state relative-caret-position="320">
+          <caret line="2207" column="27" selection-start-line="2207" selection-start-column="24" selection-end-line="2207" selection-end-column="27" />
           <folding />
         </state>
       </provider>

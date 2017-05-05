@@ -2,10 +2,10 @@
   "filetype": "pagedata",
   "operation": "set-parameter",
   "content": {
-    "title": "环境光和方向光",
+    "title": "环境光"/*"环境光和方向光"*/,
     "items": [
       {
-        "chsname": "环境光 - 光照强度",
+        "chsname": "光照强度"/*"环境光 - 光照强度"*/,
         "typename": "configuration",
         "datatype": "number",
         "min": 0,
@@ -14,7 +14,7 @@
         "precision": 2,
         "varible": "ambientLightParameter.intensity",
         "callback": "updateAmbientLight()"
-      },
+      }/*,
       {
         "chsname": "方向光 - 光照强度",
         "typename": "configuration",
@@ -36,7 +36,7 @@
         "precision": 2,
         "varible": "directionalLightParameter.height_factor",
         "callback": "updataDirectionalLight()"
-      }
+      }*/
     ]
   }
 }

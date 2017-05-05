@@ -1687,7 +1687,7 @@ function loadJSON(location) {
     // 重要提醒：千万不要在JSON中使用双斜线添加注释，会导致jQuery无法加载对象，并且不调用回调函数的错误！！！
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功获取JSON文件：' + location);
+            // showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -1790,7 +1790,7 @@ function loadSidePanel(location) {
     // 重要提醒：千万不要在JSON中使用双斜线添加注释，会导致jQuery无法加载对象，并且不调用回调函数的错误！！！
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功获取JSON文件：' + location);
+            // showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -2430,7 +2430,7 @@ function loadUpdateFloorByColor() {
     var location = 'json/pagedata/floor-color.json';
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功获取JSON文件：' + location);
+            // showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -2452,7 +2452,7 @@ function loadUpdatePlaneByTexture(typename) {
     var location = 'json/pagedata/' + typename + '-texture.json';
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功获取JSON文件：' + location);
+            showPopup('成功更换板材');
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }

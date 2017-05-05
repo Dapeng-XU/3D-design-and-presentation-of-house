@@ -684,6 +684,7 @@ function mouseclick() {
                         loadModifyPlane('floor');
                         break;
                     case 'ceiling':
+                        loadModifyPlane('ceiling');
                         break;
                     case 'wall':
                         loadModifyPlane('wall');
@@ -706,7 +707,7 @@ function mouseclick() {
                     location = 'json/pagedata/obj-modify.json';
                     $.get(location, function (data, status) {
                         if (status === 'success') {
-                            showPopup('成功获取JSON文件：' + location);
+                            showPopup('选中了家具');
                         } else {
                             errout('获取JSON文件(' + location + ')失败', true);
                         }
@@ -734,7 +735,7 @@ function mouseclick() {
                         location = 'json/pagedata/spotlight-modify.json';
                         $.get(location, function (data, status) {
                             if (status === 'success') {
-                                showPopup('成功获取JSON文件：' + location);
+                                showPopup('选中了聚光灯');
                             } else {
                                 errout('获取JSON文件(' + location + ')失败', true);
                             }
@@ -747,7 +748,7 @@ function mouseclick() {
                     location = 'json/pagedata/window-modify.json';
                     $.get(location, function (data, status) {
                         if (status === 'success') {
-                            showPopup('成功获取JSON文件：' + location);
+                            showPopup('选中了窗户');
                         } else {
                             errout('获取JSON文件(' + location + ')失败', true);
                         }
@@ -759,7 +760,7 @@ function mouseclick() {
                     location = 'json/pagedata/door-modify.json';
                     $.get(location, function (data, status) {
                         if (status === 'success') {
-                            showPopup('成功获取JSON文件：' + location);
+                            showPopup('选中了门');
                         } else {
                             errout('获取JSON文件(' + location + ')失败', true);
                         }
@@ -771,7 +772,7 @@ function mouseclick() {
                     location = 'json/pagedata/surfaceplane-modify.json';
                     $.get(location, function (data, status) {
                         if (status === 'success') {
-                            showPopup('成功获取JSON文件：' + location);
+                            showPopup('选中了挂饰');
                         } else {
                             errout('获取JSON文件(' + location + ')失败', true);
                         }
@@ -831,7 +832,7 @@ var AMBIENTLIGHT;
 // 环境光的颜色
 var ambientLightParameter = {
     gray: 0x80,
-    intensity: 0.25
+    intensity: 0.52
 };
 // 创建环境光
 function createAmbientLight() {
@@ -2476,7 +2477,17 @@ function loadModifyPlane(typename) {
     var location = 'json/pagedata/' + typename + '-modify.json';
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功获取JSON文件：' + location);
+            switch(typename) {
+                case 'floor':
+                    showPopup('选中了地板');
+                    break;
+                case 'ceiling':
+                    showPopup('选中了天花板');
+                    break;
+                case 'wall':
+                    showPopup('选中了墙壁');
+                    break;
+            }
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }

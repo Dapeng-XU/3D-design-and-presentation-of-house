@@ -2,7 +2,7 @@
   "filetype": "pagedata",
   "operation": "set-parameter",
   "content": {
-    "title": "游览视角的相机",
+    "title": "游览视角观察",
     "items": [
       {
         "chsname": "你视线的高度",
@@ -15,7 +15,7 @@
         "varible": "cameraParameter.tour.height"
       },
       {
-        "chsname": "你一步的走出的距离",
+        "chsname": "游走速度（距离）",
         "typename": "configuration",
         "datatype": "number",
         "min": 0,

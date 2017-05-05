@@ -294,6 +294,17 @@ function changeView() {
     // 设置状态量
     viewPort += 1;
     viewPort %= 3;
+    switch (viewPort) {
+        case VIEWPORT.SPIN:
+            showPopup('当前是固定旋转视角');
+            break;
+        case VIEWPORT.TOP:
+            showPopup('当前是俯视视角');
+            break;
+        case VIEWPORT.TOUR:
+            showPopup('当前是游览视角');
+            break;
+    }
     // 在菜单中显示相机设置
     loadSidePanel(menulist[2].url[viewPort]);
     // 更改侧边面板上方的被选中的项目，通过设置value属性来实现
@@ -312,7 +323,7 @@ function changeView() {
             }
         }
     }
-    menuON();
+    //menuON();
 }
 
 // 禁止缩放的对象列表

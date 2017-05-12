@@ -1268,6 +1268,7 @@ function initGraphics() {
     // 相机的初始化代码提到后面了
     // 初始化渲染器为使用WebGL的绑定到ID为“canvas”的元素，参数使用JSON表示。
     renderer = new THREE.WebGLRenderer({
+        antialias: true,
         canvas: canv
     });
 

@@ -73,8 +73,8 @@ function convertDrawWallCoordToWebGLCoord(x) {
 var DEBUG_TEXT_MAX_NUMBER = 14;
 
 // 是否开启调试模式，true开启，false关闭
-// var DEBUG_ON_OFF = true;
-var DEBUG_ON_OFF = false;
+var DEBUG_ON_OFF = true;
+// var DEBUG_ON_OFF = false;
 
 // 定义移动中的观察者与墙壁的最近距离，尚未使用
 // var MIN_DISTANCE_BETWEEN_OBSERVER_AND_WALL = 0.5;
@@ -123,27 +123,101 @@ function errout(text, printTrace, stopRunning) {
     }
 }
 
-var TOOLS = {
 
-};
 
-// 弧度转角度
-function radians2degrees(radians) {
+
+
+
+// -----------------------------------------------------------------
+//                       辅助函数部分
+// -----------------------------------------------------------------
+var hTools = function(){
     "use strict";
-    return (radians / Math.PI * 180);
-}
-// 角度转弧度
-function degrees2radians(degrees) {
-    "use strict";
-    return (degrees / 180 * Math.PI);
-}
-// 一角度对应的弧度
-var ONE_DEGREE_IN_RADIANS = degrees2radians(1);
 
-// 画布的宽和高，涉及到绘制区域的大小，统一使用这两个变量。
-// 这两个变量在文档加载，窗口大小改变，显示左侧面板等改变画布大小的区域等情况下，都会更新。
-var canvHeight;
-var canvWidth;
+    // private attributes and methods
+    // colors：用于getRandColor()选取一个颜色
+    var colors = [
+        0xFF62B0,
+        0x9A03FE,
+        0x62D0FF,
+        0x48FB0D,
+        0xDFA800,
+        0xC27E3A,
+        0x990099,
+        0x9669FE,
+        0x23819C,
+        0x01F33E,
+        0xB6BA18,
+        0xFF800D,
+        0xB96F6F,
+        0x4A9586
+    ];
+
+    // 用于显示帧速率
+    var lastFrameCount = 0;
+    var frameCount = 0;
+    var FPSHandle = null;
+
+    // public attributes and methods
+    var publicSet = {
+        // 弧度转角度
+        radians2degrees: function (radians) {
+            return (radians / Math.PI * 180);
+        },
+        // 角度转弧度
+        degrees2radians: function (degrees) {
+            return (degrees / 180 * Math.PI);
+        },
+        ONE_DEGREE_IN_RADIANS: null,
+        // roundTo()：四舍五入到指定小数位数precision
+        roundTo: function (value, precision) {
+            var i;
+            if (typeof value !== 'number') {
+                value = parseFloat(value);
+            }
+            for (i = 0; i < precision; i++) {
+                value *= 10;
+            }
+            value = Math.round(value);
+            for (i = 0; i < precision; i++) {
+                value /= 10;
+            }
+            return value;
+        },
+        // getRandColor()：从给定列表中随机选取一种颜色
+        getRandColor: function () {
+            return colors[Math.floor(Math.random() * colors.length)];
+        },
+        // FPS()：显示帧速率
+        FPS: function () {
+            if (!DEBUG_ON_OFF) {
+                return;
+            }
+            var curDate = new Date();
+            errout(curDate.getHours() + ":" + curDate.getMinutes() + ":" + curDate.getSeconds() +
+                " : " + (frameCount - lastFrameCount) + 'FPS');
+            lastFrameCount = frameCount;
+            if (FPSHandle !== null) {
+                window.clearInterval(FPSHandle);
+            }
+            FPSHandle = window.setTimeout(hTools.FPS, 1000);
+        },
+        // countFrame()：统计帧速率
+        countFrame: function () {
+            frameCount++;
+        }
+    };
+
+    (function initialize() {
+        publicSet.ONE_DEGREE_IN_RADIANS = publicSet.degrees2radians(1);
+    })();
+
+    return publicSet;
+}();
+
+
+
+
 
 // 渲染使用的表面材质类型
 var MATERIAL_TYPE = {
@@ -164,91 +238,71 @@ var room = {
     initialZ: 1             // 初始的Z坐标，用于“游览”模式的观察
 };
 
-// 菜单相关的设置项
-// 默认的菜单宽度百分比
-var DEFAULT_MENU_WIDTH_PERCENT = 25;
-var menu = {
-    ON_OFF: 0,
-    widthPercent: 0            // 菜单宽度占据浏览器窗口的比例，百分数的数字部分，值域为[0, 90]
-};
 
-// 切换菜单的收敛和展开状态
-function menuToggle() {
+
+
+
+
+// --------------------------------------------------------------
+//                        侧边菜单部分
+// --------------------------------------------------------------
+var hMenu = function() {
     "use strict";
-    if (menu.ON_OFF) {
-        menu.widthPercent = 0;
-    } else {
-        menu.widthPercent = DEFAULT_MENU_WIDTH_PERCENT;
-    }
-    hRender.canvasResize();
-    menu.ON_OFF = 1 - menu.ON_OFF;
-}
 
-// 展开侧边面板
-function menuON() {
-    "use strict";
-    if (!menu.ON_OFF) {
-        menu.widthPercent = DEFAULT_MENU_WIDTH_PERCENT;
-        menu.ON_OFF = 1;
-        hRender.canvasResize();
-    }
-}
+    // private attributes and methods
+    // 默认的菜单宽度百分比
+    var DEFAULT_MENU_WIDTH_PERCENT = 25;
+    // 标记当前的菜单显示状态
+    var ON_OFF = 0;
 
-// 收起侧边面板
-function menuOFF() {
-    "use strict";
-    if (menu.ON_OFF) {
-        menu.widthPercent = 0;
-        menu.ON_OFF = 0;
-        hRender.canvasResize();
-    }
-}
+    // public attributes and methods
+    var publicSet = {
+        // 菜单宽度占据浏览器窗口的比例，百分数的数字部分，值域为[0, 90]
+        widthPercent: 0,
+        // 切换菜单的收敛和展开状态
+        toggle: function () {
+            if (ON_OFF) {
+                this.widthPercent = 0;
+            } else {
+                this.widthPercent = DEFAULT_MENU_WIDTH_PERCENT;
+            }
+            hRender.canvasResize();
+            ON_OFF = 1 - ON_OFF;
+        },
+        // 展开侧边面板
+        expand: function () {
+            if (!ON_OFF) {
+                this.widthPercent = DEFAULT_MENU_WIDTH_PERCENT;
+                ON_OFF = 1;
+                hRender.canvasResize();
+            }
+        },
+        // 收起侧边面板
+        retract: function () {
+            if (ON_OFF) {
+                this.widthPercent = 0;
+                ON_OFF = 0;
+                hRender.canvasResize();
+            }
+        },
+        // 获取菜单收起还是展开的状态
+        getStatus: function () {
+            return ON_OFF;
+        }
+    };
 
-// 按下键盘上的某个键时，
+    return publicSet;
+}();
+
+
+
+
+
+
 function keyDown(event) {
     "use strict";
-    var keyCode = parseInt(event.keyCode);
-    if (keyCode >= 'A'.charCodeAt(0) && keyCode <= 'Z'.charCodeAt(0)) {
-        switch (keyCode) {
-            case 'C'.charCodeAt(0):
-                // C：循环切换相机视角
-                hCamera.nextType();
-                break;
-            case 'M'.charCodeAt(0):
-                // M：切换菜单是否显示
-                menuToggle();
-                break;
-            case 'P'.charCodeAt(0):
-                // P：控制动画播放
-                playAnimation = !playAnimation;
-                break;
-            case 'H'.charCodeAt(0):
-                // H：显示详细的帮助页
-                toggleOverlayLayer('docs');
-                break;
-            case 'Z'.charCodeAt(0):
-                // Z：缩小选定的对象
-                zoomOut();
-                break;
-            case 'X'.charCodeAt(0):
-                // X：放大选定的对象
-                zoomIn();
-                break;
-        }
-    } else {
-        if (37 <= keyCode && keyCode <= 40) {
-            hCamera.KeyEventsHandler(keyCode);
-        }
-        if (keyCode === 46) {
-            // Delete: 删除选定的对象
-            deleteObjectFromScene();
-        } else if (keyCode === 27) {
-            // Escape: 是否开启鼠标选定
-            toggleSelectByMouse();
-        }
-    }
+
 }
-document.onkeydown = keyDown;
 
 // 禁止缩放的对象列表
 var BANNED_ZOOMING = [
@@ -308,122 +362,237 @@ function zoomOut() {
     }
 }
 
-// 支持鼠标滚轮事件。不同浏览器对于鼠标滚轮事件的支持程度是不同的。
-// http://stackoverflow.com/questions/32711895/how-to-generate-mousewheel-event-in-jquery-javascript
-var canvasJQSelector = $('#canvas');
-// Firefox
-canvasJQSelector.bind('DOMMouseScroll', function (event) {
+// ------------------------------------------------------------------
+//                         事件处理
+// ------------------------------------------------------------------
+var hEvent = function () {  // open IIFE
     "use strict";
-    if (event.originalEvent.detail > 0) {
-        // 向下滚动
-        wheelScrollDown();
-    } else {
+
+    // private attributes and methods
+    // 用于检测鼠标单击事件click
+    var mouseCoordsMouseDown = new THREE.Vector2();
+    var mouseCoordsMouseUp = new THREE.Vector2();
+    var CLICK_TIME_OUT = 500;
+    // 判定为鼠标单击事件的最大拖动半径范围
+    var MAX_MOVE_RADUIS = 9;
+    var SQUARE_OF_MAX_MOVE_RADUIS = 0;
+
+    // public attributes and methods
+    var publicSet = {
+        // 记录鼠标的位置：当鼠标移动时，更新mousePosition的值，以便计算选中的对象。该二维向量的含义见onmousemove函数内部的说明。
+        mousePosition: new THREE.Vector2(),
+        // 用于检测鼠标单击事件click
+        isClickTimeOut: false,
+
+        // 检测是否出现了鼠标的过度拖动
+        objectCoordsMouseDown: new THREE.Vector3(),
+        keyDown: function(event) {
+            var keyCode = parseInt(event.keyCode);
+            if (keyCode >= 'A'.charCodeAt(0) && keyCode <= 'Z'.charCodeAt(0)) {
+                switch (keyCode) {
+                    case 'C'.charCodeAt(0):
+                        // C：循环切换相机视角
+                        hCamera.nextType();
+                        break;
+                    case 'M'.charCodeAt(0):
+                        // M：切换菜单是否显示
+                        hMenu.toggle();
+                        break;
+                    case 'P'.charCodeAt(0):
+                        // P：控制动画播放
+                        hRender.playAnimation = !hRender.playAnimation;
+                        break;
+                    case 'H'.charCodeAt(0):
+                        // H：显示详细的帮助页
+                        toggleOverlayLayer('docs');
+                        break;
+                    case 'Z'.charCodeAt(0):
+                        // Z：缩小选定的对象
+                        zoomOut();
+                        break;
+                    case 'X'.charCodeAt(0):
+                        // X：放大选定的对象
+                        zoomIn();
+                        break;
+                }
+            } else {
+                if (37 <= keyCode && keyCode <= 40) {
+                    hCamera.KeyEventsHandler(keyCode);
+                }
+                if (keyCode === 46) {
+                    // Delete: 删除选定的对象
+                    deleteObjectFromScene();
+                } else if (keyCode === 27) {
+                    // Escape: 是否开启鼠标选定
+                    toggleSelectByMouse();
+                }
+            }
+        },
+        mouseMove: function(event) {
+            event.preventDefault();
+            /* JavaScript中，clientX、offsetX和screenX的区别：
+             * clientX：光标相对于浏览器窗口可视区域的X坐标（也称为窗口坐标）
+             * offsetX：光标相对于事件源元素的X坐标
+             * screenX：光标相对于显示器屏幕的X坐标
+             */
+            /* 设置的mouse坐标被Camera.setFromCamera()调用。
+             * .setFromCamera ( coords, camera )
+             * coords — 2D coordinates of the mouse, in normalized device coordinates (NDC)---X and Y components should be
+             *          between -1 and 1.
+             * camera — camera from which the ray should originate
+             * Updates the ray with a new origin and direction.
+             * mouse.x和mouse.y使用的是标准化设备坐标(NDC)，需要将x轴和y轴标准化到区间[-1, 1]。其中，y轴的坐标除了标准化以外，还需要
+             * 将坐标轴的方向反转。
+             */
+            MOUSE_ON_RIGHT_PANEL = false;
+            var x = ( event.offsetX / (window.innerWidth * (100 - hMenu.widthPercent) * 0.01) ) * 2 - 1;
+            var y = -( event.offsetY / window.innerHeight ) * 2 + 1;
+            hEvent.mousePosition.set(x, y);
+            /* 处理相交对象的代码可以放在mousemove事件中，也可以放在pickObject()函数中以便被render()函数调用。
+             * 放在render()函数中，调用的频率会更高，相应地会更加影响系统的性能。
+             */
+        },
+        mouseClick: function() {
+
+        },
+        mouseDown: function(event) {
+            event.preventDefault();
+            var i;
+            // 用于移动对象
+            // 由于相交的对象已经从render()->pickObject()中选择出来，我们只需要直接利用INTERSECTED。
+            // 如果有鼠标可以选择的对象
+            if (INTERSECTED && canMove(INTERSECTED)) {
+                // 用于选定导入的OBJ模型对象的整体，或者光源的整体
+                if (INTERSECTED.parent instanceof THREE.Group) {
+                    SELECTED = INTERSECTED.parent;
+                } else {
+                    SELECTED = INTERSECTED;
+                }
+                // 记录对象的原始位置，用于检测过度拖动
+                hEvent.objectCoordsMouseDown.copy(SELECTED.position);
+                // 找出射线与平面的相交位置，这里的平面是所选对象的支撑面
+                // 初始化supportingPlane，赋值为new THREE.Plane()是必须的
+                var supportingPlane = new THREE.Plane();
+                if (isSupportingFace(SELECTED)) {
+                    // 企图移动支撑面
+                    errout('企图移动支撑面', true);
+                    return;
+                    // generateMathPlane(SELECTED, supportingPlane);
+                } else {
+                    // 企图移动对象，因此根据对象的支撑面去找到这个数学意义上的平面
+                    generateMathPlane(SELECTED.supportingFace, supportingPlane);
+                }
+                /* ray方法：
+                 * intersectPlane ( plane, optionalTarget = null ) Vector3
+                 * plane -- Plane    The Plane to intersect with.
+                 * optionalTarget -- Vector3    The Vector3 to store the result in, or null to create a new Vector3.
+                 * Intersect this Ray with a Plane, returning the intersection point or null if there is no intersection.
+                 */
+                if (raycaster.ray.intersectPlane(supportingPlane, intersection)) {
+                    // errout('鼠标按下选定平面y=' + intersection.y);
+                    // errout('SELECTED.POSITION.Y=' + SELECTED.position.y);
+                    offset.copy(intersection).sub(SELECTED.position);
+                }
+                canv.style.cursor = 'move';
+            }
+
+            // 用于检测鼠标单击事件click
+            hEvent.isClickTimeOut = false;
+            setTimeout(function () {
+                hEvent.isClickTimeOut = true;
+            }, CLICK_TIME_OUT);
+            mouseCoordsMouseDown.set(event.clientX, event.clientY);
+        },
+        mouseUp: function(event) {
+            event.preventDefault();
+            if (SELECTED) {
+                // 计算拖动前后的距离之差，防止过度拖动
+                if (hEvent.objectCoordsMouseDown.sub(SELECTED.position).length() > 20 * room.height) {
+                    scene.remove(SELECTED);
+                    SELECTED = null;
+                    showPopup('对象被过度拖动，为方便操作，系统将自动删除这个对象。');
+                    return;
+                }
+                // 拖动完成，将SELECTED置空。
+                SELECTED = null;
+            }
+            canv.style.cursor = 'auto';
+            // 用于检测鼠标单击事件click
+            var isClick = false;
+            mouseCoordsMouseUp.set(event.clientX, event.clientY);
+            if (!hEvent.isClickTimeOut) {
+                // var DistanceX = mouseCoordsMouseUp.x - mouseCoordsMouseDown.x;
+                // var DistanceY = mouseCoordsMouseUp.y - mouseCoordsMouseDown.y;
+                // var squareOfDistance = DistanceX * DistanceX + DistanceY * DistanceY;
+                var squareOfDistance = mouseCoordsMouseUp.distanceToSquared(mouseCoordsMouseDown);
+                if (squareOfDistance < SQUARE_OF_MAX_MOVE_RADUIS) {
+                    isClick = true;
+                }
+            }
+            hEvent.isClickTimeOut = false;
+            if (isClick) {
+                mouseclick();
+            }
+        },
         // 向上滚动
-        wheelScrollUp();
-    }
-    // 阻止页面滚动
-    return false;
-});
-// IE, Opera, Safari
-canvasJQSelector.bind('mousewheel', function (event) {
-    "use strict";
-    if (event.originalEvent.wheelDelta < 0) {
+        wheelScrollUp: function () {zoomIn();},
         // 向下滚动
-        wheelScrollDown();
-    } else {
-        // 向上滚动
-        wheelScrollUp();
-    }
-    // 阻止页面滚动
-    return false;
-});
+        wheelScrollDown: function () {zoomOut();},
+        initialize: function () {
+            // 鼠标事件的设置（除了滚轮）
+            SQUARE_OF_MAX_MOVE_RADUIS = MAX_MOVE_RADUIS * MAX_MOVE_RADUIS;
+            document.getElementById('left_panel').onmousemove = function (event) {publicSet.mouseMove(event);};
+            document.getElementById('left_panel').onmousedown = function (event) {publicSet.mouseDown(event);};
+            document.getElementById('left_panel').onmouseup = function (event) {publicSet.mouseUp(event);};
 
-// 向上滚动
-function wheelScrollUp() {
-    "use strict";
-    zoomIn();
-}
+            // 键盘事件的设置
+            document.onkeydown = function (event) {publicSet.keyDown(event);};
 
-// 向下滚动
-function wheelScrollDown() {
-    "use strict";
-    zoomOut();
-}
+            // 加载完成之后自动运行的事件设置
+            $(document).ready(function () {
+                initSidePanel();
+                hRender.redraw();
+            });
 
-// getRandColor() 从给定列表中随机选取一种颜色
-var colors = [
-    0xFF62B0,
-    0x9A03FE,
-    0x62D0FF,
-    0x48FB0D,
-    0xDFA800,
-    0xC27E3A,
-    0x990099,
-    0x9669FE,
-    0x23819C,
-    0x01F33E,
-    0xB6BA18,
-    0xFF800D,
-    0xB96F6F,
-    0x4A9586
-];
-function getRandColor() {
-    "use strict";
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+            // 支持鼠标滚轮事件。不同浏览器对于鼠标滚轮事件的支持程度是不同的。
+            // http://stackoverflow.com/questions/32711895/how-to-generate-mousewheel-event-in-jquery-javascript
+            var canvasJQSelector = $('#canvas');
+            // Firefox
+            canvasJQSelector.bind('DOMMouseScroll', function (event) {
+                if (event.originalEvent.detail > 0) {
+                    // 向下滚动
+                    hEvent.wheelScrollDown();
+                } else {
+                    // 向上滚动
+                    hEvent.wheelScrollUp();
+                }
+                // 阻止页面滚动
+                return false;
+            });
+            // IE, Opera, Safari
+            canvasJQSelector.bind('mousewheel', function (event) {
+                if (event.originalEvent.wheelDelta < 0) {
+                    // 向下滚动
+                    hEvent.wheelScrollDown();
+                } else {
+                    // 向上滚动
+                    hEvent.wheelScrollUp();
+                }
+                // 阻止页面滚动
+                return false;
+            });
+        }
+    };
 
-// 显示帧速率
-var lastFrameCount = 0;
-var frameCount = 0;
-function FPS() {
-    "use strict";
-    if (!DEBUG_ON_OFF) {
-        return;
-    }
-    errout(Date.now() + ": " + (frameCount - lastFrameCount) + 'FPS');
-    lastFrameCount = frameCount;
-    window.setTimeout(FPS, 1000);
-}
+    return publicSet;
+}();    // close IIFE
+hEvent.initialize();
 
 
-// 当鼠标移动时，更新mouse的值，以便计算选中的对象。该二维向量的含义见onmousemove函数内部的说明。
-var mouse = new THREE.Vector2();
-document.getElementById('left_panel').onmousemove = function (event) {
-    "use strict";
-    event.preventDefault();
-    /* JavaScript中，clientX、offsetX和screenX的区别：
-     * clientX：光标相对于浏览器窗口可视区域的X坐标（也称为窗口坐标）
-     * offsetX：光标相对于事件源元素的X坐标
-     * screenX：光标相对于显示器屏幕的X坐标
-     */
-    /* 设置的mouse坐标被Camera.setFromCamera()调用。
-     * .setFromCamera ( coords, camera )
-     * coords — 2D coordinates of the mouse, in normalized device coordinates (NDC)---X and Y components should be
-     *          between -1 and 1.
-     * camera — camera from which the ray should originate
-     * Updates the ray with a new origin and direction.
-     * mouse.x和mouse.y使用的是标准化设备坐标(NDC)，需要将x轴和y轴标准化到区间[-1, 1]。其中，y轴的坐标除了标准化以外，还需要
-     * 将坐标轴的方向反转。
-     */
-    MOUSE_ON_RIGHT_PANEL = false;
-    mouse.x = ( event.offsetX / (window.innerWidth * (100 - menu.widthPercent) * 0.01) ) * 2 - 1;
-    mouse.y = -( event.offsetY / window.innerHeight ) * 2 + 1;
-    /* 处理相交对象的代码可以放在mousemove事件中，也可以放在pickObject()函数中以便被render()函数调用。
-     * 放在render()函数中，调用的频率会更高，相应地会更加影响系统的性能。
-     */
-};
 
-// 检测是否出现了鼠标的过度拖动
-var objectCoordsMouseDown = new THREE.Vector3();
-// 重要提醒：在已经定义了onmousedown、onmouseup事件的情况下，应避免再定义事件onclick，否则会出现难以理解的事情！
-// 用于检测鼠标单击事件click
-var isClickTimeOut = false;
-var mouseCoordsMouseDown = {};
-var mouseCoordsMouseUp = {};
-var CLICK_TIME_OUT = 500;
-// 理解为鼠标单击事件的最大拖动半径范围
-var MAX_MOVE_RADUIS = 9;
-var SQUARE_OF_MAX_MOVE_RADUIS = MAX_MOVE_RADUIS * MAX_MOVE_RADUIS;
+
+
+
 // 禁止移动的对象列表
 var BANNED_MOVING = [
     'floor',
@@ -446,94 +615,10 @@ function canMove(object3d) {
     }
     return ret;
 }
-// 鼠标按下的事件处理
-document.getElementById('left_panel').onmousedown = function () {
-    "use strict";
-    event.preventDefault();
-    var i;
-    // 用于移动对象
-    // 由于相交的对象已经从render()->pickObject()中选择出来，我们只需要直接利用INTERSECTED。
-    // 如果有鼠标可以选择的对象
-    if (INTERSECTED && canMove(INTERSECTED)) {
-        // 用于选定导入的OBJ模型对象的整体，或者光源的整体
-        if (INTERSECTED.parent instanceof THREE.Group) {
-            SELECTED = INTERSECTED.parent;
-        } else {
-            SELECTED = INTERSECTED;
-        }
-        // 记录对象的原始位置，用于检测过度拖动
-        objectCoordsMouseDown.copy(SELECTED.position);
-        // 找出射线与平面的相交位置，这里的平面是所选对象的支撑面
-        // 初始化supportingPlane，赋值为new THREE.Plane()是必须的
-        var supportingPlane = new THREE.Plane();
-        if (isSupportingFace(SELECTED)) {
-            // 企图移动支撑面
-            errout('企图移动支撑面', true);
-            return;
-            // generateMathPlane(SELECTED, supportingPlane);
-        } else {
-            // 企图移动对象，因此根据对象的支撑面去找到这个数学意义上的平面
-            generateMathPlane(SELECTED.supportingFace, supportingPlane);
-        }
-        /* ray方法：
-         * intersectPlane ( plane, optionalTarget = null ) Vector3
-         * plane -- Plane    The Plane to intersect with.
-         * optionalTarget -- Vector3    The Vector3 to store the result in, or null to create a new Vector3.
-         * Intersect this Ray with a Plane, returning the intersection point or null if there is no intersection.
-         */
-        if (raycaster.ray.intersectPlane(supportingPlane, intersection)) {
-            // errout('鼠标按下选定平面y=' + intersection.y);
-            // errout('SELECTED.POSITION.Y=' + SELECTED.position.y);
-            offset.copy(intersection).sub(SELECTED.position);
-        }
-        canv.style.cursor = 'move';
-    }
-
-    // 用于检测鼠标单击事件click
-    isClickTimeOut = false;
-    setTimeout(function () {
-        isClickTimeOut = true;
-    }, CLICK_TIME_OUT);
-    mouseCoordsMouseDown.x = event.clientX;
-    mouseCoordsMouseDown.y = event.clientY;
-};
-
-// 鼠标弹起的事件处理
-document.getElementById('left_panel').onmouseup = function () {
-    "use strict";
-    event.preventDefault();
-    if (SELECTED) {
-        // 计算拖动前后的距离之差，防止过度拖动
-        if (objectCoordsMouseDown.sub(SELECTED.position).length() > 20 * room.height) {
-            scene.remove(SELECTED);
-            SELECTED = null;
-            showPopup('对象被过度拖动，为方便操作，系统将自动删除这个对象。');
-            return;
-        }
-        // 拖动完成，将SELECTED置空。
-        SELECTED = null;
-    }
-    canv.style.cursor = 'auto';
-    // 用于检测鼠标单击事件click
-    var isClick = false;
-    mouseCoordsMouseUp.x = event.clientX;
-    mouseCoordsMouseUp.y = event.clientY;
-    if (!isClickTimeOut) {
-        var DistanceX = mouseCoordsMouseUp.x - mouseCoordsMouseDown.x;
-        var DistanceY = mouseCoordsMouseUp.y - mouseCoordsMouseDown.y;
-        var squareOfDistance = DistanceX * DistanceX + DistanceY * DistanceY;
-        if (squareOfDistance < SQUARE_OF_MAX_MOVE_RADUIS) {
-            isClick = true;
-        }
-    }
-    isClickTimeOut = false;
-    if (isClick) {
-        mouseclick();
-    }
-};
 
 // 指定要更改设置的对象，对象的修改代码位于各个JSON文件中
 var SELECTED_FOR_SETTING;
+// 重要提醒：在已经定义了onmousedown、onmouseup事件的情况下，应避免再定义事件onclick，否则会出现难以理解的事情！
 // 鼠标单击事件click在这里处理
 function mouseclick() {
     "use strict";
@@ -689,7 +774,7 @@ function loadBasicShape(floor_for_basic_shape) {
     for (i = 0; i < 20; i++) {
         var mat_cylinder;
         var mat_cylinder_para = {
-            color: getRandColor(),
+            color: hTools.getRandColor(),
             transparent: true,
             opacity: 0.9
         };
@@ -708,6 +793,18 @@ function loadBasicShape(floor_for_basic_shape) {
     }
 }
 
+
+
+
+
+
+
+// ------------------------------------------------------------------
+//                         光照部分
+// ------------------------------------------------------------------
+var hLight = function() {
+
+}();
 var AMBIENTLIGHT;
 // 环境光的颜色
 var ambientLightParameter = {
@@ -1187,7 +1284,7 @@ var hCamera = function () { // open IIFE
             // 重要提醒：如果观察者视线的高度太低，在游览视图中，点选地面上的物体将不能进行拖动。
             height: 20,         // 观察者视线的高度
             step: 0.5,          // 观察者前进的步长
-            rotationStep: ONE_DEGREE_IN_RADIANS * 2,         // 观察者旋转的步长
+            rotationStep: hTools.ONE_DEGREE_IN_RADIANS * 2,         // 观察者旋转的步长
             ROTATING_STEP: 0.01,
             MOVING_STEP: 0.1
         },
@@ -1221,7 +1318,7 @@ var hCamera = function () { // open IIFE
                 // TODO: 在游览模式下按方向键，效果是改变视角的位置
                 case TYPE.SPINNING:
                     // 如果处在旋转模式的不显示动画的状态下，可以移动相机
-                    if (!playAnimation) {
+                    if (!hRender.playAnimation) {
                         switch (keyCode) {
                             case 38:
                                 position.x -= this.step * Math.cos(this.spinning.rho);
@@ -1312,7 +1409,7 @@ var hCamera = function () { // open IIFE
                     curCamera.position.set(position.x + this.spinning.radius * Math.cos(this.spinning.rho), this.spinning.height,
                         position.z + this.spinning.radius * Math.sin(this.spinning.rho));
                     // 根据是否播放动画来决定是否旋转相机
-                    if (playAnimation) {
+                    if (hRender.playAnimation) {
                         this.spinning.rho += this.spinning.speed;
                     }
                     curCamera.lookAt(new THREE.Vector3(position.x, this.spinning.lookAtHeight, position.z));
@@ -1382,14 +1479,19 @@ var hRender = function(){    // open IIFE
     "use strict";
 
     // private attributes and methods
+    // 画布的宽和高，涉及到绘制区域的大小，统一使用这两个变量。
+    // 这两个变量在文档加载，窗口大小改变，显示左侧面板等改变画布大小的区域等情况下，都会更新。
     var canvasHeight = 1;
     var canvasWidth = 1;
+
     var requestId = null;
     var renderer = null;
     var DEFAULT_BACKGROUND_COLOR = 0x222222;
 
     // public attributes and methods
     var publicSet = {
+        // 指定是否播放动画，默认播放
+        playAnimation: true,
         canvasResize: function() {
             /* 获取画布的宽和高
              * 用jQuery.width()、jQuery.outerWidth()、document.getElementById(div_id).width获取宽高都会出问题。
@@ -1397,9 +1499,9 @@ var hRender = function(){    // open IIFE
              * 这两个变量在文档加载，窗口大小改变，显示右侧面板等改变画布大小的区域等情况下，都会更新。
              */
             canvasHeight = window.innerHeight - DEDUCTED_HEIGHT;
-            canvasWidth = window.innerWidth * (100 - menu.widthPercent) * 0.01 - DEDUCTED_WIDTH;
-            $('#left_panel').width((100 - menu.widthPercent) + '%');
-            $('#right_panel').width((menu.widthPercent) + '%');
+            canvasWidth = window.innerWidth * (100 - hMenu.widthPercent) * 0.01 - DEDUCTED_WIDTH;
+            $('#left_panel').width((100 - hMenu.widthPercent) + '%');
+            $('#right_panel').width((hMenu.widthPercent) + '%');
             resizeOverlayLayer();
             popupText.css('margin-top', (0.70 * window.innerHeight) + 'px');
             popupText.css('left', (0.25 * window.innerWidth) + 'px');
@@ -1417,10 +1519,10 @@ var hRender = function(){    // open IIFE
             return canvasWidth;
         },
         // globalInitialize()：负责全局初始化
-        globalInitialize: function (){
+        globalInitialize: function () {
             // 禁止用户选择文本，优化UI体验
             // 浏览器限制：仅在IE和Chrome中有效，在Firefox中无效。
-            document.body.onselectstart = function () {
+            document.onselectstart = function () {
                 return false;
             };
 
@@ -1429,12 +1531,12 @@ var hRender = function(){    // open IIFE
         },
         // Redraw(): It will redraw the whole canvas, so that we should call it as less as possible.
         redraw: function () {
+            var i;
+
+            // 设置覆盖层
             // toggleOverlayLayer('drawwall');
             hideOverlayLayer();
             // toggleOverlayLayer(true);
-
-
-            var i;
 
             // 删除场景中任何已有元素
             if (scene !== undefined) {
@@ -1495,6 +1597,9 @@ var hRender = function(){    // open IIFE
             starsBackground();
 
             if (USING_DEBUGGING_SCENE) {
+                // 绘制一系列用于参考的图形
+                loadBasicShape();
+
                 // 显示一个坐标轴，红色X，绿色Y，蓝色Z
                 var axisHelper = new THREE.AxisHelper(1000);
                 scene.add(axisHelper);
@@ -1527,16 +1632,17 @@ var hRender = function(){    // open IIFE
             raycaster = new THREE.Raycaster();
 
             // 启用帧速率显示
-            // FPS();
+            // hTools.FPS();
 
             // 渲染循环
             this.renderLoop();
         },
         renderLoop: function() {
+            // TODO: 可能存在内存泄漏，需用Chrome开发者工具检查！
             requestId = requestAnimationFrame(hRender.renderLoop);
 
             // 播放动画的代码应该放在下面的if语句块中，便于统一控制是否播放动画
-            // if (playAnimation) {
+            // if (this.playAnimation) {
             //
             // }
 
@@ -1544,7 +1650,7 @@ var hRender = function(){    // open IIFE
             hCamera.update();
 
             // 用于统计帧速率
-            frameCount++;
+            hTools.countFrame();
 
             pickObject();
 
@@ -1563,15 +1669,11 @@ hRender.globalInitialize();
 
 
 
-
 // 初始化的图形绘制
 var scene = new THREE.Scene();
 var raycaster;
 var canv = document.getElementById('canvas');
 
-// 初始化相机
-// 指定是否播放动画，默认播放
-var playAnimation = true;
 
 // 表示当前鼠标拖动选定的对象。不应该初始化这个变量。
 var SELECTED;
@@ -1604,7 +1706,7 @@ function pickObject() {
         return;
     }
     // 从光标坐标出发，从相机视角（图像渲染的最后阶段）建立一条射线。
-    raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(hEvent.mousePosition, camera);
     // 用于移动物体
     // 如果已经处于拖动物件的状态，只需改变物体的位置position
     if (SELECTED) {
@@ -1927,14 +2029,7 @@ function loadSidePanel(location) {
     });
 }
 
-// 当HTML的<body>标签完全加载之后，执行
-document.body.onload = function () {
-    "use strict";
-    initSidePanel();
 
-    // 第一次启动，重绘一次以初始化
-    hRender.redraw();
-};
 
 // 阻止从选择面板中拖拽，优化UI体验
 document.getElementById('right_panel').ondragstart = function () {
@@ -2868,22 +2963,7 @@ function generateMathPlane(planeGeometry, mathPlane) {
     }
 }
 
-// 四舍五入到指定小数位数precision
-function roundTo(value, precision) {
-    "use strict";
-    var i;
-    if (typeof value !== 'number') {
-        value = parseFloat(value);
-    }
-    for (i = 0; i < precision; i++) {
-        value *= 10;
-    }
-    value = Math.round(value);
-    for (i = 0; i < precision; i++) {
-        value /= 10;
-    }
-    return value;
-}
+
 
 // 用于实现数据绑定
 function NumberBind(varToBind, min, max, step, precision, callback) {
@@ -2918,12 +2998,12 @@ function NumberBind(varToBind, min, max, step, precision, callback) {
     this.domElement.setAttribute('value', this._value);
     this.domElement.parent = this;
     this.domElement.onchange = function () {
-        this.parent._value = roundTo(this.value, this.parent._precision);
+        this.parent._value = hTools.roundTo(this.value, this.parent._precision);
         eval(varToBind + ' = this.parent._value;');
         this.parent._callback(this.parent._value);
     };
     this.domElement.onmousewheel = function () {
-        this.parent._value = roundTo(this.value, this.parent._precision);
+        this.parent._value = hTools.roundTo(this.value, this.parent._precision);
         eval(varToBind + ' = this.parent._value;');
         this.parent._callback(this.parent._value);
     };
@@ -2931,7 +3011,7 @@ function NumberBind(varToBind, min, max, step, precision, callback) {
         return this._value;
     };
     this.setValue = function (newValue) {
-        var retVal = roundTo(newValue, this._precision);
+        var retVal = hTools.roundTo(newValue, this._precision);
         this._value = retVal;
         this.domElement.value = retVal;
         this._callback(this._value);

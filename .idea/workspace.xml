@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2513" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2584" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="1919" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="560" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2073" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="1999" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2778" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2608" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2679" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2021" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="645" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2168" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2094" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2873" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa4a6a10-be8a-494d-bc0b-ca9e4429a0ae" name="Default" comment="">
@@ -38,8 +38,8 @@
       <file leaf-file-name="main_frame.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main_frame.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1570">
-              <caret line="1422" column="55" selection-start-line="1422" selection-start-column="55" selection-end-line="1422" selection-end-column="55" />
+            <state relative-caret-position="425">
+              <caret line="1672" column="24" selection-start-line="1672" selection-start-column="24" selection-end-line="1672" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -48,8 +48,8 @@
       <file leaf-file-name="camera-spinning.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/json/pagedata/camera-spinning.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1045">
-              <caret line="55" column="40" selection-start-line="55" selection-start-column="40" selection-end-line="55" selection-end-column="40" />
+            <state relative-caret-position="19">
+              <caret line="1" column="14" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -88,8 +88,8 @@
       <file leaf-file-name="test.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="2" column="3" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
+            <state relative-caret-position="361">
+              <caret line="21" column="30" selection-start-line="21" selection-start-column="30" selection-end-line="21" selection-end-column="30" />
               <folding>
                 <element signature="e#0#41#0" expanded="false" />
               </folding>
@@ -100,8 +100,8 @@
       <file leaf-file-name="main_page.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main_page.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="95">
-              <caret line="5" column="85" selection-start-line="5" selection-start-column="85" selection-end-line="5" selection-end-column="85" />
+            <state relative-caret-position="1463">
+              <caret line="77" column="66" selection-start-line="77" selection-start-column="66" selection-end-line="77" selection-end-column="66" />
               <folding />
             </state>
           </provider>
@@ -176,11 +176,11 @@
         <option value="$PROJECT_DIR$/json/pagedata/ceiling-modify.json" />
         <option value="$PROJECT_DIR$/main_page.html" />
         <option value="$PROJECT_DIR$/qunit_test.html" />
-        <option value="$PROJECT_DIR$/js/test.js" />
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/json/pagedata/camera-spin.json" />
         <option value="$PROJECT_DIR$/json/pagedata/camera-top.json" />
         <option value="$PROJECT_DIR$/json/pagedata/camera-tour.json" />
+        <option value="$PROJECT_DIR$/js/test.js" />
         <option value="$PROJECT_DIR$/js/main_frame.js" />
       </list>
     </option>
@@ -260,24 +260,7 @@
       <pane id="Scratches" />
       <pane id="Scope" />
       <pane id="ProjectPane">
-        <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-        </subPane>
+        <subPane />
       </pane>
     </panes>
   </component>
@@ -490,21 +473,7 @@
       <workItem from="1494202470394" duration="644000" />
       <workItem from="1494568545841" duration="359000" />
       <workItem from="1494571299538" duration="663000" />
-      <workItem from="1494571996323" duration="37241000" />
-    </task>
-    <task id="LOCAL-00090" summary="禁止地板和天花板被移动&#10;">
-      <created>1472813859213</created>
-      <option name="number" value="00090" />
-      <option name="presentableId" value="LOCAL-00090" />
-      <option name="project" value="LOCAL" />
-      <updated>1472813859213</updated>
-    </task>
-    <task id="LOCAL-00091" summary="在俯视图中不显示天花板">
-      <created>1472814835755</created>
-      <option name="number" value="00091" />
-      <option name="presentableId" value="LOCAL-00091" />
-      <option name="project" value="LOCAL" />
-      <updated>1472814835756</updated>
+      <workItem from="1494571996323" duration="45361000" />
     </task>
     <task id="LOCAL-00092" summary="重命名add-obj.json为obj-add.json">
       <created>1472815179023</created>
@@ -835,11 +804,25 @@
       <option name="project" value="LOCAL" />
       <updated>1494656420581</updated>
     </task>
-    <option name="localTasksCounter" value="139" />
+    <task id="LOCAL-00139" summary="Reconstruct the renderer part.">
+      <created>1494661585580</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1494661585580</updated>
+    </task>
+    <task id="LOCAL-00140" summary="Update the test item.">
+      <created>1494662758489</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1494662758489</updated>
+    </task>
+    <option name="localTasksCounter" value="141" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="636438000" />
+    <option name="totallyTimeSpent" value="644558000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -852,15 +835,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="32" width="1936" height="1056" extended-state="6" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12111638" sideWeight="0.61990213" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.12111638" sideWeight="0.61990213" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21064061" sideWeight="0.49739778" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32952693" sideWeight="0.5026022" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40282303" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21281216" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34364262" sideWeight="0.48550186" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2365416" sideWeight="0.49739778" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18746708" sideWeight="0.7318008" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18746708" sideWeight="0.7318008" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.50570965" sideWeight="0.66245353" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.14944237" sideWeight="0.38009787" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.57585645" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -905,8 +888,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="初步增加光照调节的相关代码" />
-    <MESSAGE value="完善光照调节，修复若干BUG" />
     <MESSAGE value="维护文件框架，删除不需要的文件" />
     <MESSAGE value="最后调优" />
     <MESSAGE value="删除不用的Google字体，删除部分TODO" />
@@ -930,7 +911,9 @@
     <MESSAGE value="Update the test module." />
     <MESSAGE value="Update three.js to the r85 version." />
     <MESSAGE value="Reconstruct the camera part." />
-    <option name="LAST_COMMIT_MESSAGE" value="Reconstruct the camera part." />
+    <MESSAGE value="Reconstruct the renderer part." />
+    <MESSAGE value="Update the test item." />
+    <option name="LAST_COMMIT_MESSAGE" value="Update the test item." />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.8510029" />
   </component>
   <component name="XDebuggerManager">
@@ -1177,14 +1160,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/third-party/three.js/three.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="17160" column="17" selection-start-line="17160" selection-start-column="17" selection-end-line="17160" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/json/pagedata/spotlight-modify.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="684">
@@ -1205,42 +1180,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main_page.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="95">
-          <caret line="5" column="85" selection-start-line="5" selection-start-column="85" selection-end-line="5" selection-end-column="85" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/test.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="2" column="3" selection-start-line="2" selection-start-column="3" selection-end-line="2" selection-end-column="3" />
-          <folding>
-            <element signature="e#0#41#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/qunit_test.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="7" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/pagedata/camera-spinning.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1045">
-          <caret line="55" column="40" selection-start-line="55" selection-start-column="40" selection-end-line="55" selection-end-column="40" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/pagedata/camera-looking_down.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="15" column="39" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
+        <state relative-caret-position="1463">
+          <caret line="77" column="66" selection-start-line="77" selection-start-column="66" selection-end-line="77" selection-end-column="66" />
           <folding />
         </state>
       </provider>
@@ -1253,10 +1194,52 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/json/pagedata/camera-looking_down.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="15" column="39" selection-start-line="15" selection-start-column="39" selection-end-line="15" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/qunit_test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="12" column="7" selection-start-line="12" selection-start-column="7" selection-end-line="12" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="21" column="30" selection-start-line="21" selection-start-column="30" selection-end-line="21" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#41#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/third-party/three.js/three.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="498">
+          <caret line="875" column="25" selection-start-line="875" selection-start-column="21" selection-end-line="875" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/pagedata/camera-spinning.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="1" column="14" selection-start-line="1" selection-start-column="14" selection-end-line="1" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/main_frame.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1570">
-          <caret line="1422" column="55" selection-start-line="1422" selection-start-column="55" selection-end-line="1422" selection-end-column="55" />
+        <state relative-caret-position="425">
+          <caret line="1672" column="24" selection-start-line="1672" selection-start-column="24" selection-end-line="1672" selection-end-column="24" />
           <folding />
         </state>
       </provider>

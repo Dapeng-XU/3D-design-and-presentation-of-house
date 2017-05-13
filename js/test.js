@@ -37,6 +37,10 @@ var IIFE_public_private = function () {  // open IIFE
         // showVal5() 公有函数加this访问私有变量（错误情况，正确的方法在showVal4()中演示）
         showVal5: function() {
             return this.val5;
+        },
+        // showVal6() 公有函数访问私有变量，私有变量通过setVal6()初始化
+        showVal6: function() {
+            return val6;
         }
     };
 
@@ -44,12 +48,16 @@ var IIFE_public_private = function () {  // open IIFE
     var val3 = 3;
     var val4 = 4;
     var val5 = 5;
+    var val6;
     function subShowVal2() {
         return publicSet.val2;
     }
     function subShowVal3() {
         return val3;
     }
+    (function setVal6(){
+        val6 = 6;
+    })();
 
     return publicSet;
 }();    // close IIFE
@@ -66,6 +74,7 @@ QUnit.test('IIFE_public_private()', function(assert) {
     assert.equal(IIFE_public_private.val3 , undefined, 'val3');
     assert.equal(IIFE_public_private.showVal4() , 4, 'showVal4()');
     assert.equal(IIFE_public_private.showVal5() , undefined, 'showVal5()');
+    assert.equal(IIFE_public_private.showVal6() , 6, 'showVal6()');
 });
 
 

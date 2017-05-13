@@ -2,6 +2,8 @@
  * Created by Dapegn on 2016/8/15.
  */
 
+// 2017年5月12日，小规模重构代码。
+
 /* ===========================
  *   代码阅读提示
  * ===========================
@@ -44,6 +46,9 @@
 var DEDUCT_HEIGHT = 0;
 var DEDUCT_WIDTH = 0;
 
+// 是否使用测试场景
+var USING_DEBUGGING_SCENE = false;
+
 // 从画户型页面接收到的比例尺
 var DRAW_WALL_SCALE;
 // 多少个画户型页面中的像素单位相当于1m？
@@ -76,7 +81,6 @@ var DEBUG_ON_OFF = false;
 
 // 更规范的方式，定义全局变量，然后通过全局变量访问其他库中定义的函数和变量
 var THREE = window.THREE;
-var dat = window.dat;
 
 // 用于调试输出，控制div标签的id="debug_text"
 var debug_text_number = 0;
@@ -118,6 +122,10 @@ function errout(text, printTrace, stopRunning) {
         }
     }
 }
+
+var TOOLS = {
+
+};
 
 // 弧度转角度
 function radians2degrees(radians) {
@@ -186,7 +194,7 @@ function menuON() {
     }
 }
 
-// 收敛侧边面板
+// 收起侧边面板
 function menuOFF() {
     "use strict";
     if (menu.ON_OFF) {
@@ -197,15 +205,14 @@ function menuOFF() {
 }
 
 // 按下键盘上的某个键时，
-document.body.onkeydown = keyDown;
 function keyDown(event) {
     "use strict";
-    var keycode = parseInt(event.keyCode);
-    if (keycode >= 'A'.charCodeAt(0) && keycode <= 'Z'.charCodeAt(0)) {
-        switch (keycode) {
+    var keyCode = parseInt(event.keyCode);
+    if (keyCode >= 'A'.charCodeAt(0) && keyCode <= 'Z'.charCodeAt(0)) {
+        switch (keyCode) {
             case 'C'.charCodeAt(0):
                 // C：循环切换相机视角
-                changeView();
+                hCamera.nextType();
                 break;
             case 'M'.charCodeAt(0):
                 // M：切换菜单是否显示
@@ -229,102 +236,19 @@ function keyDown(event) {
                 break;
         }
     } else {
-        // 在游览模式下按方向键，效果是改变视角的位置
-        // if (viewPort === VIEWPORT.TOUR) {
-        switch (viewPort) {
-            case VIEWPORT.SPIN:
-            case VIEWPORT.TOUR:
-                var showup = "";
-                switch (keycode) {
-                    case 37:
-                        showup = '左';
-                        cameraParameter.tour.rho -= cameraParameter.tour.rotationStep;
-                        break;
-                    case 38:
-                        showup = '上';
-                        viewPos.x += viewPos.step * Math.cos(cameraParameter.tour.rho);
-                        viewPos.z += viewPos.step * Math.sin(cameraParameter.tour.rho);
-                        break;
-                    case 39:
-                        showup = '右';
-                        cameraParameter.tour.rho += cameraParameter.tour.rotationStep;
-                        break;
-                    case 40:
-                        showup = '下';
-                        viewPos.x -= viewPos.step * Math.cos(cameraParameter.tour.rho);
-                        viewPos.z -= viewPos.step * Math.sin(cameraParameter.tour.rho);
-                        break;
-                }
-                break;
-            case VIEWPORT.TOP:
-                switch (keycode) {
-                    case 37:
-                        showup = '左';
-                        viewPos.x -= viewPos.step;
-                        break;
-                    case 38:
-                        showup = '上';
-                        viewPos.z -= viewPos.step;
-                        break;
-                    case 39:
-                        showup = '右';
-                        viewPos.x += viewPos.step;
-                        break;
-                    case 40:
-                        showup = '下';
-                        viewPos.z += viewPos.step;
-                        break;
-                }
-                break;
+        if (37 <= keyCode && keyCode <= 40) {
+            hCamera.KeyEventsHandler(keyCode);
         }
-        if (keycode === 46) {
+        if (keyCode === 46) {
             // Delete: 删除选定的对象
             deleteObjectFromScene();
-        } else if (keycode === 27) {
+        } else if (keyCode === 27) {
             // Escape: 是否开启鼠标选定
             toggleSelectByMouse();
         }
     }
 }
-
-// 切换相机视角
-function changeView() {
-    "use strict";
-    var i;
-    // 设置状态量
-    viewPort += 1;
-    viewPort %= 3;
-    switch (viewPort) {
-        case VIEWPORT.SPIN:
-            showPopup('当前是固定旋转视角');
-            break;
-        case VIEWPORT.TOP:
-            showPopup('当前是俯视视角');
-            break;
-        case VIEWPORT.TOUR:
-            showPopup('当前是游览视角');
-            break;
-    }
-    // 在菜单中显示相机设置
-    loadSidePanel(menulist[2].url[viewPort]);
-    // 更改侧边面板上方的被选中的项目，通过设置value属性来实现
-    selector.value = 2;
-    // 控制俯视图的情况下不显示天花板，更好的实现方式可能是使用遍历函数traverse()对scene的所有孩子进行遍历
-    if (viewPort === VIEWPORT.TOP) {
-        for (i = 0; i < scene.children.length; i++) {
-            if (scene.children[i].typename === 'ceiling') {
-                scene.children[i].visible = false;
-            }
-        }
-    } else {
-        for (i = 0; i < scene.children.length; i++) {
-            if (scene.children[i].typename === 'ceiling') {
-                scene.children[i].visible = true;
-            }
-        }
-    }
-    //menuON();
-}
+document.onkeydown = keyDown;
 
 // 禁止缩放的对象列表
 var BANNED_ZOOMING = [
@@ -446,49 +370,6 @@ var colors = [
 function getRandColor() {
     "use strict";
     return colors[Math.floor(Math.random() * colors.length)];
-}
-
-// 视口，有'TOP'（俯视图，正投影）、'SPIN'（绕Y轴旋转，透视）和'TOUR'（游览，透视）两种模式
-var VIEWPORT = {
-    'TOP': 0,
-    'SPIN': 1,
-    'TOUR': 2
-};
-// 当前的视角
-var viewPort = VIEWPORT.SPIN;
-
-// 相机参数，这里嵌套使用了JSON结构。
-// 所有的相机参数的初始化放在这里，不再在phics中再次指定。
-// 仅在页面加载时进行一次初始化。以后，无论画布的大小发生怎样的变化，下列相机参数应当保持不变。
-var cameraParameter = {
-    spin: {                 // 旋转视图
-        x: 8,               // 转轴的x位置
-        z: 8,               // 转轴的z位置
-        radius: 28,      // 旋转半径
-        rho: 0,             // 旋转经过的角度数（角度偏移量），不应该修改它
-        height: 23,          // 高度
-        speed: 0.0084,      // 相机旋转的速度
-        lookAtHeight: 12    // 画面中心点高度
-    },
-    top: {                  // 俯视图
-        width: 200,
-        step: 0.5
-    },
-    tour: {                 // 游览视图
-        positionX: 1,       // 观察者在X轴的位置，不应该修改它
-        positionZ: 1,       // 观察者在Z轴的位置，不应该修改它
-        rho: 0,             // 观察者在平行于地面的水平面中朝向的角度数（角度偏移量），不应该修改它
-        // 重要提醒：如果观察者视线的高度太低，在游览视图中，点选地面上的物体将不能进行拖动。
-        height: 20,          // 观察者视线的高度
-        step: 0.5,         // 观察者前进的步长
-        rotationStep: ONE_DEGREE_IN_RADIANS * 2         // 观察者旋转的步长
-    }
-};
-// 观察点的中心位置
-var viewPos = {
-    x: 0,
-    z: 0,
-    step: 1,                // 观察者前进的步长
 }
 
 // 显示帧速率
@@ -1200,8 +1081,7 @@ function loadApartment() {
         initPos.add(apartmentWall[i]);
     }
     initPos.multiplyScalar(1/apartmentWall.length);
-    viewPos.x = initPos.x;
-    viewPos.z = initPos.y;
+    hCamera.setPosition(initPos.x, 0, initPos.y);
 }
 // 点和墙壁距离的最大容忍数值
 var MAX_TOLERANT_DISTANCE= 0.1;
@@ -1251,9 +1131,380 @@ var FLOOR_VERTICES = [
     [-500, -500]
 ];
 
+
+
+// -----------------------------------------------------------
+//                        相机部分
+// -----------------------------------------------------------
+var camera;
+var hCamera = function () { // open IIFE
+    "use strict";
+
+    // private attributes and methods
+    // 当前的相机类型
+    var curType = null;
+    // 相机的位置
+    var position = null;
+    // 所有相机引用
+    var objRef = [null, null, null];
+    // TODO: 增加自旋转视角
+    // 相机的类型
+    var TYPE = {
+        SPINNING: 0,        // 固定旋转视角
+        LOOKING_DOWN: 1,    // 俯视视角
+        TOURIST: 2,         // 游览视角
+        length: 3           // 表示总的类型个数，用于循环切换
+    };
+    // 默认的相机类型
+    var DEFAULT_TYPE = 0;
+    // 对用户友好的名称
+    var NAME = {
+        0: '固定旋转视角',
+        1: '俯视视角',
+        2: '游览视角'
+    };
+    // 配置文件
+    var URL = [
+        'json/pagedata/camera-spinning.json',
+        'json/pagedata/camera-looking_down.json',
+        'json/pagedata/camera-tourist.json'
+    ];
+
+    // public attributes and methods
+    // 下面的参数列表中，1是一个缺省值，没有实际意义，仅仅为了传参方便。
+    var publicSet = {
+        //  向前移动的步长
+        step: 1,
+        // 三种相机模式的参数
+        spinning: {
+            x: 8,               // 转轴的x位置
+            z: 8,               // 转轴的z位置
+            radius: 28,         // 旋转半径
+            rho: 0,             // 旋转经过的角度数（角度偏移量），不应该修改它
+            height: 23,         // 高度
+            speed: 0.0084,      // 相机旋转的速度
+            lookAtHeight: 12,   // 画面中心点高度
+            DEFAULT_ROTATING_SPEED: 0.01,
+            MOVING_STEP: 0.1
+        },
+        lookingDown: {
+            width: 200,
+            step: 0.5,
+            HEIGHT: 3
+        },
+        tourist: {
+            positionX: 1,       // 观察者在X轴的位置，不应该修改它
+            positionZ: 1,       // 观察者在Z轴的位置，不应该修改它
+            rho: 0,             // 观察者在平行于地面的水平面中朝向的角度数（角度偏移量），不应该修改它
+            // 重要提醒：如果观察者视线的高度太低，在游览视图中，点选地面上的物体将不能进行拖动。
+            height: 20,         // 观察者视线的高度
+            step: 0.5,          // 观察者前进的步长
+            rotationStep: ONE_DEGREE_IN_RADIANS * 2,         // 观察者旋转的步长
+            ROTATING_STEP: 0.01,
+            MOVING_STEP: 0.1
+        },
+        // 当前的相机引用
+        obj: null,
+        // 初始化函数
+        initialize: function () {
+            objRef[TYPE.LOOKING_DOWN] = new THREE.OrthographicCamera(1, 1, 1, 1, 0.1, 100);
+            objRef[TYPE.SPINNING] = new THREE.PerspectiveCamera(75, 1, 0.1, 10000);
+            objRef[TYPE.TOURIST] = new THREE.PerspectiveCamera(75, 1, 0.1, 10000);
+            curType = DEFAULT_TYPE;
+            this.obj = objRef[DEFAULT_TYPE];
+            position = new THREE.Vector3(0, 0, 0);
+            this.update();
+        },
+        // setPosition()：设置相机的位置
+        setPosition: function(x, y, z) {
+            position.set(x, y, z);
+        },
+        // getTypeName()：获取当前相机类型的名称
+        getTypeName: function () {
+            return NAME[curType];
+        },
+        // getURL()：获取配置文件的URL
+        getURL: function () {
+            return URL[curType];
+        },
+        // KeyEventsHandler()：键盘事件处理，目前处理方向键
+        KeyEventsHandler: function (keyCode) {
+            switch (curType) {
+                // TODO: 在游览模式下按方向键，效果是改变视角的位置
+                case TYPE.SPINNING:
+                    // 如果处在旋转模式的不显示动画的状态下，可以移动相机
+                    if (!playAnimation) {
+                        switch (keyCode) {
+                            case 38:
+                                position.x -= this.step * Math.cos(this.spinning.rho);
+                                position.z -= this.step * Math.sin(this.spinning.rho);
+                                break;
+                            case 40:
+                                position.x += this.step * Math.cos(this.spinning.rho);
+                                position.z += this.step * Math.sin(this.spinning.rho);
+                                break;
+                        }
+                    }
+                    break;
+                case TYPE.TOURIST:
+                    // Key Code: 37 - Left, 38 - Up, 39 - Right, 40 - Down
+                    switch (keyCode) {
+                        case 37:
+                            this.tourist.rho -= this.tourist.rotationStep;
+                            break;
+                        case 38:
+                            position.x += this.step * Math.cos(this.tourist.rho);
+                            position.z += this.step * Math.sin(this.tourist.rho);
+                            break;
+                        case 39:
+                            this.tourist.rho += this.tourist.rotationStep;
+                            break;
+                        case 40:
+                            position.x -= this.step * Math.cos(this.tourist.rho);
+                            position.z -= this.step * Math.sin(this.tourist.rho);
+                            break;
+                    }
+                    break;
+                case TYPE.LOOKING_DOWN:
+                    // Key Code: 37 - Left, 38 - Up, 39 - Right, 40 - Down
+                    switch (keyCode) {
+                        case 37:
+                            position.x -= this.step;
+                            break;
+                        case 38:
+                            position.z -= this.step;
+                            break;
+                        case 39:
+                            position.x += this.step;
+                            break;
+                        case 40:
+                            position.z += this.step;
+                            break;
+                    }
+                    break;
+            }
+        },
+        // update(): 每次更新相机的时候被调用，典型例子是动画循环。
+        update: function () {
+            var curCamera;
+            switch (curType) {
+                case TYPE.LOOKING_DOWN:
+                    // TODO: 添加俯视图的朝向修改功能。
+                    // 俯视图相机：使用正交相机，观察方向lookAt的y=0，相机向上的方向up默认情况下是固定的。
+                    // 俯视图相机的约定：上北下南左西右东
+                    // 为了保持照相机的横竖比例，需要保证(right - left)与(top - bottom)的比例与Canvas宽度与高度的比例一致。
+                    curCamera = objRef[TYPE.LOOKING_DOWN];
+                    var width = this.lookingDown.width;
+                    var height = width * canvHeight / canvWidth;
+
+
+                    // OrthographicCamera( left, right, top, bottom, near, far )
+                    // TODO: 下面的这种修改方式有错误，为什么？
+                    // curCamera.left = - width / 2;
+                    // curCamera.right = width / 2;
+                    // curCamera.top = height / 2;
+                    // curCamera.bottom = - height / 2;
+                    var left = - width / 2;
+                    var right = width / 2;
+                    var top = height / 2;
+                    var bottom = - height / 2;
+                    curCamera = new THREE.OrthographicCamera(left, right, top, bottom, 0.1, 100);
+
+
+                    // 相机对象的位置设置
+                    position.y = room.height - 0.1;
+                    curCamera.position.copy(position);
+                    curCamera.lookAt(new THREE.Vector3(position.x, 0, position.z));
+                    curCamera.up.set(-1, 0, 0);
+                    break;
+                case TYPE.SPINNING:
+                    // 绕轴旋转的相机：使用透视相机
+                    // PerspectiveCamera( fov, aspect, near, far )
+                    curCamera = objRef[TYPE.SPINNING];
+                    curCamera.position.set(position.x + this.spinning.radius * Math.cos(this.spinning.rho), this.spinning.height,
+                        position.z + this.spinning.radius * Math.sin(this.spinning.rho));
+                    // 根据是否播放动画来决定是否旋转相机
+                    if (playAnimation) {
+                        this.spinning.rho += this.spinning.speed;
+                    }
+                    curCamera.lookAt(new THREE.Vector3(position.x, this.spinning.lookAtHeight, position.z));
+                    break;
+                case TYPE.TOURIST:
+                    // 游览视角的相机：使用透视相机
+                    curCamera = objRef[TYPE.TOURIST];
+                    position.y = this.tourist.height;
+                    curCamera.position.copy(position);
+                    curCamera.lookAt(new THREE.Vector3(position.x + Math.cos(this.tourist.rho),
+                        this.tourist.height, position.z + Math.sin(this.tourist.rho)));
+                    break;
+            }
+            if (curType !== TYPE.LOOKING_DOWN) {
+                // 设置宽高比
+                curCamera.aspect = canvWidth / canvHeight;
+            }
+            // 更新相关的矩阵
+            curCamera.updateMatrixWorld();
+            // 输出
+            this.obj = curCamera;
+            camera = curCamera;
+        },
+        // nextType()：切换到下一个类型的相机
+        nextType: function () {
+            var i;
+            // 设置状态量
+            curType = (curType + 1) % TYPE.length;
+            showPopup('当前是' + this.getTypeName());
+
+            // 在菜单中显示相机设置
+            // loadSidePanel(this.getURL());
+            // 更改侧边面板上方的被选中的项目，通过设置value属性来实现
+            // selector.value = 2;
+
+            // 控制俯视图的情况下不显示天花板，更好的实现方式可能是使用遍历函数traverse()对scene的所有孩子进行遍历
+            if (curType === TYPE.LOOKING_DOWN) {
+                for (i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].typename === 'ceiling') {
+                        scene.children[i].visible = false;
+                    }
+                }
+            } else {
+                for (i = 0; i < scene.children.length; i++) {
+                    if (scene.children[i].typename === 'ceiling') {
+                        scene.children[i].visible = true;
+                    }
+                }
+            }
+
+            // 显示菜单
+            //menuON();
+        }
+    };
+
+    return publicSet;
+}();    // close IIFE
+hCamera.initialize();
+
+
+
+
+
+// -------------------------------------------------------------------------
+//                         WebGL渲染器部分
+// -------------------------------------------------------------------------
+var render;
+var hRender = function(){    // open IIFE
+    "use strict";
+
+    // private attributes and methods
+    var canvasHeight = 1;
+    var canvasWidth = 1;
+    var requestId = null;
+    var renderer = null;
+    var DEFAULT_BACKGROUND_COLOR = 0x222222;
+
+    // public attributes and methods
+    var publicSet = {
+        canvasResize: function(camera) {
+            /* 获取画布的宽和高
+             * 用jQuery.width()、jQuery.outerWidth()、document.getElementById(div_id).width获取宽高都会出问题。
+             * 但是用window.innerWidth可以取得很好的效果。
+             * 这两个变量在文档加载，窗口大小改变，显示左侧面板等改变画布大小的区域等情况下，都会更新。
+             */
+            this.canvasHeight = window.innerHeight;
+            this.canvasWidth = window.innerWidth;
+            if (camera) {
+                camera.aspect = this.canvasWidth / this.canvasHeight;
+                camera.updateProjectionMatrix();
+            }
+            if (this.renderer) {
+                this.renderer.setSize(this.canvasWidth, this.canvasHeight);
+            }
+        },
+        // Redraw(): It will redraw the whole canvas, so that we should call it as less as possible.
+        redraw: function () {
+            // 每次窗口的大小发生改变时，也改变画布的大小
+            // window.onresize = this.canvasResize(Camera.camera);
+            // this.canvasResize(Camera.camera);
+            // 禁止用户选择文本，优化UI体验
+            document.body.onselectstart = function () {
+                return false;
+            };
+
+            var i;
+            var listLength = scene.children.length;
+            for (i=0;i<listLength;i++) {
+                scene.remove(scene.children[0]);
+            }
+            // 为避免多个requestAnimationFrame()循环同时绘制图像，造成帧速率太高（远高于60FPS），停止已有的绘制刷新循环
+            if (this.requestId) {
+                window.cancelAnimationFrame(this.requestId);
+                this.requestId = undefined;
+            }
+
+            // -------------------------------------------------------------
+            // 初始化新的图形绘制，绘制整个场景
+            // -------------------------------------------------------------
+            // Three basic elements in Three.js: Scene, camera, renderer.
+            // 初始化渲染器为使用WebGL的绑定到ID为“canvas”的元素，参数使用JSON表示。
+            this.renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                canvas: document.getElementById('canvas')
+            });
+
+            // 重设渲染器的大小为窗口大小；否则，默认的渲染大小很小，在屏幕上显示出大的块状。
+            // setSize()同时会改变画布大小
+            this.renderer.setSize(this.canvasWidth, this.canvasHeight);
+            this.renderer.setClearColor(this.DEFAULT_BACKGROUND_COLOR);
+            if (window.devicePixelRatio) {
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+            }
+            this.renderer.sortObjects = false;
+
+            // Cause lights will determine how the shader do rendering, we should deal with the lights before the objects.
+            // Lights.initialize();
+            // Lights.update();
+            //
+            // Checkerboard.drawInScene();
+            // Cuboids.drawInScene();
+            // Spheres.drawInScene();
+            // Camera.initialize();
+            //
+            // // 显示一个坐标轴，红色X，绿色Y，蓝色Z
+            // var axisHelper = new THREE.AxisHelper(2000);
+            // scene.add(axisHelper);
+            //
+            // FPS();
+            // Renderer.renderLoop();
+        },
+        renderLoop: function() {
+            requestId = requestAnimationFrame(this.renderLoop);
+
+            // 播放动画的代码应该放在下面的if语句块中，便于统一控制是否播放动画
+            // if (playAnimation) {
+            //
+            // }
+
+            // hCamera.update() 必须放在 animate() 的后边，不然会造成播放和暂停切换瞬间的抖动问题
+            hCamera.update();
+
+            // 用于统计帧速率
+            frameCount++;
+
+            pickObject();
+
+            renderer.render(scene, hCamera.obj);
+        },
+        animate: function() {
+            // cameraEllipseAnimate.animate(Camera.camera);
+        }
+    };
+
+    return publicSet;
+}();    // close IIFE
+
 // 初始化的图形绘制
 var scene = new THREE.Scene();
-var camera, renderer, raycaster;
+var renderer, raycaster;
 var canv = document.getElementById('canvas');
 // 默认背景色
 var DEFAULT_BACKGROUND_COLOR = 0x000000;
@@ -1311,7 +1562,8 @@ function initGraphics() {
     // }
 
     // 加载户型数据，并进行解析和绘制
-    loadApartment();
+    if (!USING_DEBUGGING_SCENE)
+        loadApartment();
 
     // 添加星空背景
     starsBackground();
@@ -1333,32 +1585,34 @@ function initGraphics() {
     // 不显示所有的灯光助手
     hideAllLightHelper();
 
-    // 显示一个坐标轴，红色X，绿色Y，蓝色Z
-    var axisHelper = new THREE.AxisHelper(1000);
-    scene.add(axisHelper);
+    if (USING_DEBUGGING_SCENE) {
+        // 显示一个坐标轴，红色X，绿色Y，蓝色Z
+        var axisHelper = new THREE.AxisHelper(1000);
+        scene.add(axisHelper);
 
-    // 显示网格
-    // var gridHelper = new THREE.GridHelper(10, 20);
-    // var gridHelper2 = new THREE.GridHelper(10, 20);
-    // gridHelper2.position.y = room.height;
-    // scene.add(gridHelper);
-    // scene.add(gridHelper2);
-    // var gridHelper3 = new THREE.GridHelper(10, 20);
-    // gridHelper3.rotateX(Math.PI / 2);
-    // gridHelper3.position.z = 8;
-    // scene.add(gridHelper3);
-    // var gridHelper4 = new THREE.GridHelper(10, 20);
-    // gridHelper4.rotateX(Math.PI / 2);
-    // gridHelper4.position.z = -8;
-    // scene.add(gridHelper4);
-    // var gridHelper5 = new THREE.GridHelper(10, 20);
-    // gridHelper5.rotateZ(Math.PI / 2);
-    // gridHelper5.position.x = 8;
-    // scene.add(gridHelper5);
-    // var gridHelper6 = new THREE.GridHelper(10, 20);
-    // gridHelper6.rotateZ(Math.PI / 2);
-    // gridHelper6.position.x = -8;
-    // scene.add(gridHelper6);
+        // 显示网格
+        var gridHelper = new THREE.GridHelper(10, 20);
+        var gridHelper2 = new THREE.GridHelper(10, 20);
+        gridHelper2.position.y = room.height;
+        scene.add(gridHelper);
+        scene.add(gridHelper2);
+        var gridHelper3 = new THREE.GridHelper(10, 20);
+        gridHelper3.rotateX(Math.PI / 2);
+        gridHelper3.position.z = 8;
+        scene.add(gridHelper3);
+        var gridHelper4 = new THREE.GridHelper(10, 20);
+        gridHelper4.rotateX(Math.PI / 2);
+        gridHelper4.position.z = -8;
+        scene.add(gridHelper4);
+        var gridHelper5 = new THREE.GridHelper(10, 20);
+        gridHelper5.rotateZ(Math.PI / 2);
+        gridHelper5.position.x = 8;
+        scene.add(gridHelper5);
+        var gridHelper6 = new THREE.GridHelper(10, 20);
+        gridHelper6.rotateZ(Math.PI / 2);
+        gridHelper6.position.x = -8;
+        scene.add(gridHelper6);
+    }
 
     // 射线，用于拾取(pick)对象
     raycaster = new THREE.Raycaster();
@@ -1369,71 +1623,6 @@ function initGraphics() {
 // 初始化相机
 // 指定是否播放动画，默认播放
 var playAnimation = true;
-function updateCamera() {
-    "use strict";
-    switch (viewPort) {
-        case VIEWPORT.TOP:
-            // 俯视图相机
-            // OrthographicCamera( left, right, top, bottom, near, far )
-            // 上北下南左西右东
-            // 为了保持照相机的横竖比例，需要保证(right - left)与(top - bottom)的比例与Canvas宽度与高度的比例一致。
-            // var left = -cameraParameter.top.width * cameraParameter.top.ewEdgePercent;
-            // var right = cameraParameter.top.width * (1 + cameraParameter.top.ewEdgePercent);
-            // var top = cameraParameter.top.height * (1 + cameraParameter.top.nsEdgePercent);
-            // var bottom = -cameraParameter.top.height * cameraParameter.top.nsEdgePercent;
-            // var left = -cameraParameter.top.width * cameraParameter.top.ewEdgePercent;
-            // var right = cameraParameter.top.width * (1 + cameraParameter.top.ewEdgePercent);
-            // var top = cameraParameter.top.height * (1 + cameraParameter.top.nsEdgePercent);
-            // var bottom = -cameraParameter.top.height * cameraParameter.top.nsEdgePercent;
-            // if ((top - bottom) / (right - left) > (canv.height / canv.width)) {
-            //     // 高度太大了，宽度太小了，宽度可增大
-            //     var rl_distance = (top - bottom) * canv.width / canv.height;
-            //     left = -(rl_distance - cameraParameter.top.width) / 2;
-            //     right = cameraParameter.top.width + (rl_distance - cameraParameter.top.width) / 2;
-            // } else {
-            //     // 高度太小了，宽度太大了，高度可增大
-            //     // 即便相等，也满足这种情况
-            //     var tb_distance = (right - left) * canv.height / canv.width;
-            //     bottom = -(tb_distance - cameraParameter.top.height) / 2;
-            //     top = cameraParameter.top.height + (tb_distance - cameraParameter.top.height) / 2;
-            // }
-            var height = cameraParameter.top.width * canvHeight / canvWidth;
-            var width = cameraParameter.top.width;
-            var left = - width / 2;
-            var right = width / 2;
-            var top = height / 2;
-            var bottom = - height / 2;
-            camera = new THREE.OrthographicCamera(left, right, top, bottom, 0.1, 100);
-            // camera.position.set(cameraParameter.top.height / 2, room.height + 0.1, cameraParameter.top.width);
-            // camera.lookAt(new THREE.Vector3(cameraParameter.top.height / 2, 0, cameraParameter.top.width));
-            camera.position.set(viewPos.x, room.height + 0.1, viewPos.z);
-            camera.lookAt(new THREE.Vector3(viewPos.x, 0, viewPos.z));
-            camera.up.set(-1, 0, 0);
-            break;
-        case VIEWPORT.SPIN:
-            // 绕轴旋转的相机
-            // PerspectiveCamera( fov, aspect, near, far )
-            camera = new THREE.PerspectiveCamera(75, canvWidth / canvHeight, 0.1, 10000);
-            camera.position.set(viewPos.x + cameraParameter.spin.radius * Math.cos(
-                    cameraParameter.spin.rho), cameraParameter.spin.height, viewPos.z +
-                cameraParameter.spin.radius * Math.sin(cameraParameter.spin.rho));
-            // 根据是否播放动画来决定是否旋转相机
-            if (playAnimation) {
-                cameraParameter.spin.rho += cameraParameter.spin.speed;
-            }
-            camera.lookAt(new THREE.Vector3(viewPos.x, cameraParameter.spin.lookAtHeight, viewPos.z));
-            break;
-        case VIEWPORT.TOUR:
-            // 游览视角的相机
-            camera = new THREE.PerspectiveCamera(75, canvWidth / canvHeight, 0.1, 10000);
-            camera.position.set(viewPos.x, cameraParameter.tour.height, viewPos.z);
-            camera.lookAt(new THREE.Vector3(viewPos.x + Math.cos(cameraParameter.tour.rho),
-                cameraParameter.tour.height, viewPos.z + Math.sin(cameraParameter.tour.rho)));
-            break;
-    }
-    camera.aspect = canvWidth / canvHeight;
-    camera.updateMatrixWorld();
-}
 
 // 表示当前鼠标拖动选定的对象。不应该初始化这个变量。
 var SELECTED;
@@ -1681,7 +1870,7 @@ function render() {
     // if (playAnimation) {
     // }
 
-    updateCamera();
+    hCamera.update();
 
     // 用于统计帧速率
     frameCount++;
@@ -1724,11 +1913,7 @@ var menulist = [
     {
         id: 'camera',
         chsname: '相机视角',
-        url: [
-            'json/pagedata/camera-top.json',
-            'json/pagedata/camera-spin.json',
-            'json/pagedata/camera-tour.json'
-        ]
+        url: []
     },
     {
         id: 'addsp',
@@ -1771,7 +1956,7 @@ function initSidePanel() {
                 loadSidePanel(menulist[1].url[0]);
                 break;
             case 'camera':
-                loadSidePanel(menulist[2].url[viewPort]);
+                loadSidePanel(hCamera.getURL());
                 break;
             case 'addsp':
                 loadSidePanel(menulist[3].url[0]);
@@ -1802,7 +1987,7 @@ function loadSidePanel(location) {
     // 重要提醒：千万不要在JSON中使用双斜线添加注释，会导致jQuery无法加载对象，并且不调用回调函数的错误！！！
     $.get(location, function (data, status) {
         if (status === 'success') {
-            // showPopup('成功获取JSON文件：' + location);
+            showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -1842,9 +2027,8 @@ function canvasResize() {
     resizeOverlayLayer();
     popupText.css('margin-top', (0.70 * window.innerHeight) + 'px');
     popupText.css('left', (0.25 * window.innerWidth) + 'px');
-    if (camera) {
-        camera.aspect = canvWidth / canvHeight;
-        camera.updateProjectionMatrix();
+    if (camera !== undefined) {
+        hCamera.update();
     }
     if (renderer) {
         renderer.setSize(canvWidth, canvHeight);
@@ -2191,7 +2375,7 @@ function deleteObjectFromScene() {
 var DEFAULT_SURFACEPLANE_SIZE = {
     width: 5,
     height: 5
-}
+};
 // 从菜单中添加对象
 // 这个函数应该由家具列表的列表项的鼠标单击事件触发
 // 必备参数：对象的类型，对象的URL位置（如果是OBJ模型）

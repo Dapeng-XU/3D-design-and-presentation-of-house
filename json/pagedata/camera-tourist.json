@@ -1,5 +1,6 @@
 {
   "filetype": "pagedata",
+  "object-class": "camera",
   "operation": "set-parameter",
   "content": {
     "title": "游览视角观察",
@@ -12,7 +13,7 @@
         "max": 1000,
         "step": 0.1,
         "precision": 1,
-        "varible": "cameraParameter.tour.height"
+        "varible": "hCamera.tourist.height"
       },
       {
         "chsname": "游走速度（距离）",
@@ -22,7 +23,7 @@
         "max": 10,
         "step": 0.1,
         "precision": 1,
-        "varible": "viewPos.step"
+        "varible": "hCamera.step"
       },
       {
         "chsname": "你旋转步伐的快慢",
@@ -32,7 +33,7 @@
         "max": 10,
         "step": 0.0004,
         "precision": 4,
-        "varible": "cameraParameter.tour.rotationStep"
+        "varible": "hCamera.tourist.rotationStep"
       }
     ]
   }

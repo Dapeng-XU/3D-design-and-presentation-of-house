@@ -1,5 +1,6 @@
 {
   "filetype": "pagedata",
+  "object-class": "camera",
   "operation": "set-parameter",
   "content": {
     "title": "俯视视角观察",
@@ -12,7 +13,7 @@
         "max": 1000,
         "step": 0.1,
         "precision": 1,
-        "varible": "cameraParameter.top.width"
+        "varible": "hCamera.lookingDown.width"
       }
     ]
   }

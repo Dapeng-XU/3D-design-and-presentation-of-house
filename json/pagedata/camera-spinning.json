@@ -1,5 +1,6 @@
 {
   "filetype": "pagedata",
+  "object-class": "camera",
   "operation": "set-parameter",
   "content": {
     "title": "固定旋转观察",
@@ -12,7 +13,7 @@
         "max": 2,
         "step": 0.01,
         "precision": 2,
-        "varible": "viewPos.step"
+        "varible": "hCamera.step"
       },
       {
         "chsname": "旋转半径",
@@ -22,7 +23,7 @@
         "max": 100,
         "step": 0.1,
         "precision": 1,
-        "varible": "cameraParameter.spin.radius"
+        "varible": "hCamera.spinning.radius"
       },
       {
         "chsname": "你视线的高度",
@@ -32,7 +33,7 @@
         "max": 1000,
         "step": 0.1,
         "precision": 1,
-        "varible": "cameraParameter.spin.height"
+        "varible": "hCamera.spinning.height"
       },
       {
         "chsname": "速度",
@@ -42,7 +43,7 @@
         "max": 0.02,
         "step": 0.0004,
         "precision": 4,
-        "varible": "cameraParameter.spin.speed"
+        "varible": "hCamera.spinning.speed"
       },
       {
         "chsname": "画面中心点的高度",
@@ -52,7 +53,7 @@
         "max": 30,
         "step": 0.1,
         "precision": 2,
-        "varible": "cameraParameter.spin.lookAtHeight"
+        "varible": "hCamera.spinning.lookAtHeight"
       }
     ]
   }

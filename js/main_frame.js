@@ -43,8 +43,8 @@
 */
 
 // 减去的长和宽的像素数，如果在浏览器中显示出来的结果没有问题，就不需要做修改
-var DEDUCT_HEIGHT = 0;
-var DEDUCT_WIDTH = 0;
+var DEDUCTED_HEIGHT = 0;
+var DEDUCTED_WIDTH = 0;
 
 // 是否使用测试场景
 var USING_DEBUGGING_SCENE = false;
@@ -101,7 +101,7 @@ function errout(text, printTrace, stopRunning) {
         debug_text_content.shift();
     }
     var debug_text = document.getElementById('debug_text');
-    debug_text.height = canvHeight;
+    debug_text.height = hRender.getCanvasHeight();
     // join也是一种数组方法，用于合成为一个字符串，并插入指定的分隔符
     debug_text.innerHTML = debug_text_content.join('<br/>');
     // 打印调用栈
@@ -180,7 +180,7 @@ function menuToggle() {
     } else {
         menu.widthPercent = DEFAULT_MENU_WIDTH_PERCENT;
     }
-    canvasResize();
+    hRender.canvasResize();
     menu.ON_OFF = 1 - menu.ON_OFF;
 }
 
@@ -190,7 +190,7 @@ function menuON() {
     if (!menu.ON_OFF) {
         menu.widthPercent = DEFAULT_MENU_WIDTH_PERCENT;
         menu.ON_OFF = 1;
-        canvasResize();
+        hRender.canvasResize();
     }
 }
 
@@ -200,7 +200,7 @@ function menuOFF() {
     if (menu.ON_OFF) {
         menu.widthPercent = 0;
         menu.ON_OFF = 0;
-        canvasResize();
+        hRender.canvasResize();
     }
 }
 
@@ -385,18 +385,6 @@ function FPS() {
     window.setTimeout(FPS, 1000);
 }
 
-// 避免多个requestAnimationFrame()循环同时绘制图像。
-/* 对整个场景进行重绘（重新建立一个绘制，scene也重新创建）时，如果不停止已有的动画循环，即不使用下面这段代码，会造成帧速率升高
- * 的问题。这是由JavaScript的内部机制决定的。
- */
-var requestId;
-function stop() {
-    "use strict";
-    if (requestId) {
-        window.cancelAnimationFrame(requestId);
-        requestId = undefined;
-    }
-}
 
 // 当鼠标移动时，更新mouse的值，以便计算选中的对象。该二维向量的含义见onmousemove函数内部的说明。
 var mouse = new THREE.Vector2();
@@ -1213,7 +1201,7 @@ var hCamera = function () { // open IIFE
             curType = DEFAULT_TYPE;
             this.obj = objRef[DEFAULT_TYPE];
             position = new THREE.Vector3(0, 0, 0);
-            this.update();
+            // this.update();
         },
         // setPosition()：设置相机的位置
         setPosition: function(x, y, z) {
@@ -1295,7 +1283,7 @@ var hCamera = function () { // open IIFE
                     // 为了保持照相机的横竖比例，需要保证(right - left)与(top - bottom)的比例与Canvas宽度与高度的比例一致。
                     curCamera = objRef[TYPE.LOOKING_DOWN];
                     var width = this.lookingDown.width;
-                    var height = width * canvHeight / canvWidth;
+                    var height = width * hRender.getCanvasHeight() / hRender.getCanvasWidth();
 
 
                     // OrthographicCamera( left, right, top, bottom, near, far )
@@ -1338,10 +1326,8 @@ var hCamera = function () { // open IIFE
                         this.tourist.height, position.z + Math.sin(this.tourist.rho)));
                     break;
             }
-            if (curType !== TYPE.LOOKING_DOWN) {
-                // 设置宽高比
-                curCamera.aspect = canvWidth / canvHeight;
-            }
+            // 设置宽高比
+            curCamera.aspect = hRender.getCanvasWidth() / hRender.getCanvasHeight();
             // 更新相关的矩阵
             curCamera.updateMatrixWorld();
             // 输出
@@ -1404,80 +1390,150 @@ var hRender = function(){    // open IIFE
 
     // public attributes and methods
     var publicSet = {
-        canvasResize: function(camera) {
+        canvasResize: function() {
             /* 获取画布的宽和高
              * 用jQuery.width()、jQuery.outerWidth()、document.getElementById(div_id).width获取宽高都会出问题。
              * 但是用window.innerWidth可以取得很好的效果。
-             * 这两个变量在文档加载，窗口大小改变，显示左侧面板等改变画布大小的区域等情况下，都会更新。
+             * 这两个变量在文档加载，窗口大小改变，显示右侧面板等改变画布大小的区域等情况下，都会更新。
              */
-            this.canvasHeight = window.innerHeight;
-            this.canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight - DEDUCTED_HEIGHT;
+            canvasWidth = window.innerWidth * (100 - menu.widthPercent) * 0.01 - DEDUCTED_WIDTH;
+            $('#left_panel').width((100 - menu.widthPercent) + '%');
+            $('#right_panel').width((menu.widthPercent) + '%');
+            resizeOverlayLayer();
+            popupText.css('margin-top', (0.70 * window.innerHeight) + 'px');
+            popupText.css('left', (0.25 * window.innerWidth) + 'px');
             if (camera) {
-                camera.aspect = this.canvasWidth / this.canvasHeight;
-                camera.updateProjectionMatrix();
+                hCamera.update();
             }
-            if (this.renderer) {
-                this.renderer.setSize(this.canvasWidth, this.canvasHeight);
+            if (renderer) {
+                renderer.setSize(canvasWidth, canvasHeight);
             }
         },
-        // Redraw(): It will redraw the whole canvas, so that we should call it as less as possible.
-        redraw: function () {
-            // 每次窗口的大小发生改变时，也改变画布的大小
-            // window.onresize = this.canvasResize(Camera.camera);
-            // this.canvasResize(Camera.camera);
+        getCanvasHeight: function (){
+            return canvasHeight;
+        },
+        getCanvasWidth: function (){
+            return canvasWidth;
+        },
+        // globalInitialize()：负责全局初始化
+        globalInitialize: function (){
             // 禁止用户选择文本，优化UI体验
+            // 浏览器限制：仅在IE和Chrome中有效，在Firefox中无效。
             document.body.onselectstart = function () {
                 return false;
             };
 
+            // 每次窗口的大小发生改变时，也改变画布的大小
+            window.onresize = hRender.canvasResize;
+        },
+        // Redraw(): It will redraw the whole canvas, so that we should call it as less as possible.
+        redraw: function () {
+            // toggleOverlayLayer('drawwall');
+            hideOverlayLayer();
+            // toggleOverlayLayer(true);
+
+
             var i;
-            var listLength = scene.children.length;
-            for (i=0;i<listLength;i++) {
-                scene.remove(scene.children[0]);
+
+            // 删除场景中任何已有元素
+            if (scene !== undefined) {
+                var listLength = scene.children.length;
+                for (i=0;i<listLength;i++) {
+                    scene.remove(scene.children[0]);
+                }
             }
+
             // 为避免多个requestAnimationFrame()循环同时绘制图像，造成帧速率太高（远高于60FPS），停止已有的绘制刷新循环
-            if (this.requestId) {
-                window.cancelAnimationFrame(this.requestId);
-                this.requestId = undefined;
+            if (requestId) {
+                window.cancelAnimationFrame(requestId);
+                requestId = undefined;
             }
+
+            // 每次窗口的大小发生改变时，也改变画布的大小
+            this.canvasResize();
 
             // -------------------------------------------------------------
             // 初始化新的图形绘制，绘制整个场景
             // -------------------------------------------------------------
-            // Three basic elements in Three.js: Scene, camera, renderer.
+            // Three basic elements in Three.js are: Scene, camera, renderer.
             // 初始化渲染器为使用WebGL的绑定到ID为“canvas”的元素，参数使用JSON表示。
-            this.renderer = new THREE.WebGLRenderer({
+            renderer = new THREE.WebGLRenderer({
                 antialias: true,
-                canvas: document.getElementById('canvas')
+                canvas: canv
             });
 
             // 重设渲染器的大小为窗口大小；否则，默认的渲染大小很小，在屏幕上显示出大的块状。
             // setSize()同时会改变画布大小
-            this.renderer.setSize(this.canvasWidth, this.canvasHeight);
-            this.renderer.setClearColor(this.DEFAULT_BACKGROUND_COLOR);
+            renderer.setSize(canvasWidth, canvasHeight);
+
+            renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
             if (window.devicePixelRatio) {
-                this.renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setPixelRatio(window.devicePixelRatio);
             }
-            this.renderer.sortObjects = false;
+            renderer.sortObjects = false;
 
             // Cause lights will determine how the shader do rendering, we should deal with the lights before the objects.
             // Lights.initialize();
             // Lights.update();
-            //
-            // Checkerboard.drawInScene();
-            // Cuboids.drawInScene();
-            // Spheres.drawInScene();
-            // Camera.initialize();
-            //
-            // // 显示一个坐标轴，红色X，绿色Y，蓝色Z
-            // var axisHelper = new THREE.AxisHelper(2000);
-            // scene.add(axisHelper);
-            //
+
+            // 创建方向光和环境光
+            createDirectionalLight();
+            createAmbientLight();
+            // 不显示所有的灯光助手
+            hideAllLightHelper();
+
+            // 绘制很大的天花板和地板
+            loadFloorAndCeiling([0, 0], FLOOR_VERTICES, {floorFill: 'images/materials/gray50.jpg'});
+
+            // 加载户型数据，并进行解析和绘制
+            if (!USING_DEBUGGING_SCENE){
+                loadApartment();
+            }
+
+            // 添加星空背景
+            starsBackground();
+
+            if (USING_DEBUGGING_SCENE) {
+                // 显示一个坐标轴，红色X，绿色Y，蓝色Z
+                var axisHelper = new THREE.AxisHelper(1000);
+                scene.add(axisHelper);
+
+                // 显示参考网格
+                var gridHelper = new THREE.GridHelper(10, 20);
+                var gridHelper2 = new THREE.GridHelper(10, 20);
+                gridHelper2.position.y = room.height;
+                scene.add(gridHelper);
+                scene.add(gridHelper2);
+                var gridHelper3 = new THREE.GridHelper(10, 20);
+                gridHelper3.rotateX(Math.PI / 2);
+                gridHelper3.position.z = 8;
+                scene.add(gridHelper3);
+                var gridHelper4 = new THREE.GridHelper(10, 20);
+                gridHelper4.rotateX(Math.PI / 2);
+                gridHelper4.position.z = -8;
+                scene.add(gridHelper4);
+                var gridHelper5 = new THREE.GridHelper(10, 20);
+                gridHelper5.rotateZ(Math.PI / 2);
+                gridHelper5.position.x = 8;
+                scene.add(gridHelper5);
+                var gridHelper6 = new THREE.GridHelper(10, 20);
+                gridHelper6.rotateZ(Math.PI / 2);
+                gridHelper6.position.x = -8;
+                scene.add(gridHelper6);
+            }
+
+            // 射线，用于拾取(pick)对象
+            raycaster = new THREE.Raycaster();
+
+            // 启用帧速率显示
             // FPS();
-            // Renderer.renderLoop();
+
+            // 渲染循环
+            this.renderLoop();
         },
         renderLoop: function() {
-            requestId = requestAnimationFrame(this.renderLoop);
+            requestId = requestAnimationFrame(hRender.renderLoop);
 
             // 播放动画的代码应该放在下面的if语句块中，便于统一控制是否播放动画
             // if (playAnimation) {
@@ -1501,124 +1557,17 @@ var hRender = function(){    // open IIFE
 
     return publicSet;
 }();    // close IIFE
+hRender.globalInitialize();
+
+
+
+
+
 
 // 初始化的图形绘制
 var scene = new THREE.Scene();
-var renderer, raycaster;
+var raycaster;
 var canv = document.getElementById('canvas');
-// 默认背景色
-var DEFAULT_BACKGROUND_COLOR = 0x000000;
-function initGraphics() {
-    "use strict";
-    var i;
-
-    // toggleOverlayLayer('drawwall');
-    hideOverlayLayer();
-    // toggleOverlayLayer(true);
-    // Three.js的三要素：场景、相机、渲染器。
-    // 相机的初始化代码提到后面了
-    // 初始化渲染器为使用WebGL的绑定到ID为“canvas”的元素，参数使用JSON表示。
-    renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        canvas: canv
-    });
-
-    // 重设渲染器的大小为窗口大小；否则，默认的渲染大小很小，在屏幕上显示出大的块状。
-    // setSize()同时会改变画布大小
-    renderer.setSize(canvWidth, canvHeight);
-    // 设置画布默认的背景色
-    renderer.setClearColor(DEFAULT_BACKGROUND_COLOR);
-    if (window.devidevicePixelRatio) {
-        renderer.setPixelRatio(window.devicePixelRatio);
-    }
-    renderer.sortObjects = false;
-
-    // 此处，交换顶点次序能够得到相同的结果
-    // var vertexList = [[-7, -7], [-5, 20], [16, 16], [19, 1]];
-    // var vertexList = [[-8, -8], [-8, 8], [8, 8], [8, -8]];
-    // var vertexList = [[-20, -20], [30, -30], [40, 30], [50, 20], [-20, 40]];
-    // loadFloorAndCeiling([0, 0], vertexList, {floorFill: 'images/materials/white.jpg'});
-    // loadFloorAndCeiling([0, 0], vertexList);
-
-    // var vertexListLength = vertexList.length;
-    // for (i = 0; i < vertexListLength - 1; i++) {
-    //     drawSingleWall(vertexList[i], vertexList[i + 1]);
-    // }
-    // drawSingleWall(vertexList[vertexListLength - 1], vertexList[0]);
-
-    // 绘制很大的天花板和地板
-    loadFloorAndCeiling([0, 0], FLOOR_VERTICES, {floorFill: 'images/materials/gray50.jpg'});
-
-    // var floor_for_basic_shape;
-    // // 从已添加的对象中寻找地板元素，以便于移动用于调试的基本图形
-    // for (i = 0; i < scene.children.length; i++) {
-    //     if (scene.children[i].typename === 'floor') {
-    //         floor_for_basic_shape = scene.children[i];
-    //         break;
-    //     }
-    // }
-    // if (!floor_for_basic_shape) {
-    //     errout('error', true);
-    // }
-
-    // 加载户型数据，并进行解析和绘制
-    if (!USING_DEBUGGING_SCENE)
-        loadApartment();
-
-    // 添加星空背景
-    starsBackground();
-
-    // var ceiling_for_temp;
-    // // 从已添加的对象中寻找地板元素，以便于移动光源（仅调试）
-    // for (i = 0; i < scene.children.length; i++) {
-    //     if (scene.children[i].typename === 'ceiling') {
-    //         ceiling_for_temp = scene.children[i];
-    //         break;
-    //     }
-    // }
-    // var spotlight_pos = new THREE.Vector3(5, 6, 5);
-    // createSpotLight(spotlight_pos, ceiling_for_temp);
-
-    // 创建方向光和环境光
-    createDirectionalLight();
-    createAmbientLight();
-    // 不显示所有的灯光助手
-    hideAllLightHelper();
-
-    if (USING_DEBUGGING_SCENE) {
-        // 显示一个坐标轴，红色X，绿色Y，蓝色Z
-        var axisHelper = new THREE.AxisHelper(1000);
-        scene.add(axisHelper);
-
-        // 显示网格
-        var gridHelper = new THREE.GridHelper(10, 20);
-        var gridHelper2 = new THREE.GridHelper(10, 20);
-        gridHelper2.position.y = room.height;
-        scene.add(gridHelper);
-        scene.add(gridHelper2);
-        var gridHelper3 = new THREE.GridHelper(10, 20);
-        gridHelper3.rotateX(Math.PI / 2);
-        gridHelper3.position.z = 8;
-        scene.add(gridHelper3);
-        var gridHelper4 = new THREE.GridHelper(10, 20);
-        gridHelper4.rotateX(Math.PI / 2);
-        gridHelper4.position.z = -8;
-        scene.add(gridHelper4);
-        var gridHelper5 = new THREE.GridHelper(10, 20);
-        gridHelper5.rotateZ(Math.PI / 2);
-        gridHelper5.position.x = 8;
-        scene.add(gridHelper5);
-        var gridHelper6 = new THREE.GridHelper(10, 20);
-        gridHelper6.rotateZ(Math.PI / 2);
-        gridHelper6.position.x = -8;
-        scene.add(gridHelper6);
-    }
-
-    // 射线，用于拾取(pick)对象
-    raycaster = new THREE.Raycaster();
-
-    render();
-}
 
 // 初始化相机
 // 指定是否播放动画，默认播放
@@ -1862,23 +1811,6 @@ function toggleSelectByMouse(setMode) {
     }
 }
 
-function render() {
-    "use strict";
-    requestId = requestAnimationFrame(render);
-
-    // 播放动画的代码应该放在下面的if语句块中，便于统一控制是否播放动画
-    // if (playAnimation) {
-    // }
-
-    hCamera.update();
-
-    // 用于统计帧速率
-    frameCount++;
-
-    pickObject();
-
-    renderer.render(scene, camera);
-}
 
 // 加载JSON文件，这个函数不应该被调用，仅作参考
 var jsondata;
@@ -1999,11 +1931,9 @@ function loadSidePanel(location) {
 document.body.onload = function () {
     "use strict";
     initSidePanel();
-    // openLogin();
+
     // 第一次启动，重绘一次以初始化
-    redraw();
-    // 启用帧速率显示
-    FPS();
+    hRender.redraw();
 };
 
 // 阻止从选择面板中拖拽，优化UI体验
@@ -2014,52 +1944,6 @@ document.getElementById('right_panel').ondragstart = function () {
 
 var popupText = $('#popup_text');
 
-function canvasResize() {
-    "use strict";
-    /* 获取画布的宽和高
-     * 用jQuery.width()、jQuery.outerWidth()、document.getElementById(div_id).width获取宽高都会出问题。
-     * 但是用window.innerWidth可以取得很好的效果。
-     */
-    canvHeight = window.innerHeight - DEDUCT_HEIGHT;
-    canvWidth = window.innerWidth * (100 - menu.widthPercent) * 0.01 - DEDUCT_WIDTH;
-    $('#left_panel').width((100 - menu.widthPercent) + '%');
-    $('#right_panel').width((menu.widthPercent) + '%');
-    resizeOverlayLayer();
-    popupText.css('margin-top', (0.70 * window.innerHeight) + 'px');
-    popupText.css('left', (0.25 * window.innerWidth) + 'px');
-    if (camera !== undefined) {
-        hCamera.update();
-    }
-    if (renderer) {
-        renderer.setSize(canvWidth, canvHeight);
-    }
-}
-
-// 每次窗口的大小发生改变时，也改变画布的大小
-window.onresize = canvasResize;
-
-// 重绘整个画布。除非必要，应避免对整个场景的重绘（调用这个函数）。
-function redraw() {
-    "use strict";
-    canvasResize();
-    var i;
-    for (i=0;i<scene.children.length;i++) {
-        scene.remove(scene.children[i]);
-    }
-    // 可能涉及到更复杂的问题
-    // 避免多个requestAnimationFrame()循环同时绘制图像，造成帧速率太高（远高于60FPS）
-    // 停止已有的绘制刷新循环
-    stop();
-    // 初始化新的图形绘制，绘制整个场景
-    initGraphics();
-}
-
-// 禁止用户选择文本，优化UI体验
-// 浏览器限制：仅在IE和Chrome中有效，在Firefox中无效。
-document.body.onselectstart = function () {
-    "use strict";
-    return false;
-};
 
 // TODO: 按照角度制旋转OBJ对象
 // 在菜单栏中选定的，要导入的对象

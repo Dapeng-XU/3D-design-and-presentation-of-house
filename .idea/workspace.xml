@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2569" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2640" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2016" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2163" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2089" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2834" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2568" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2639" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2015" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2162" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2088" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2833" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="aa4a6a10-be8a-494d-bc0b-ca9e4429a0ae" name="Default" comment="Reconstruct the light part and the classification part.">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+    <list default="true" id="aa4a6a10-be8a-494d-bc0b-ca9e4429a0ae" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/main_frame.js" afterPath="$PROJECT_DIR$/js/main_frame.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/pagedata/light-configure.json" afterPath="$PROJECT_DIR$/json/pagedata/light-configure.json" />
     </list>
     <ignored path="homedesign.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,8 +47,8 @@
       <file leaf-file-name="main_frame.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main_frame.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="66" column="36" selection-start-line="66" selection-start-column="36" selection-end-line="66" selection-end-column="36" />
+            <state relative-caret-position="-836">
+              <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
               <folding>
                 <element signature="e#0#42#0" expanded="false" />
               </folding>
@@ -543,14 +541,7 @@
       <workItem from="1494571299538" duration="663000" />
       <workItem from="1494571996323" duration="48001000" />
       <workItem from="1494740075234" duration="741000" />
-      <workItem from="1494758383101" duration="10582000" />
-    </task>
-    <task id="LOCAL-00096" summary="初步增加环境光源">
-      <created>1472982441979</created>
-      <option name="number" value="00096" />
-      <option name="presentableId" value="LOCAL-00096" />
-      <option name="project" value="LOCAL" />
-      <updated>1472982441979</updated>
+      <workItem from="1494758383101" duration="10864000" />
     </task>
     <task id="LOCAL-00097" summary="解除对dat.gui的依赖">
       <created>1472990910462</created>
@@ -888,11 +879,18 @@
       <option name="project" value="LOCAL" />
       <updated>1494768485287</updated>
     </task>
-    <option name="localTasksCounter" value="145" />
+    <task id="LOCAL-00145" summary="Reconstruct the light part and the classification part.">
+      <created>1494768989581</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1494768989582</updated>
+    </task>
+    <option name="localTasksCounter" value="146" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="658521000" />
+    <option name="totallyTimeSpent" value="658803000" />
   </component>
   <component name="TodoView" selected-index="4">
     <todo-panel id="selected-file">
@@ -907,7 +905,7 @@
     <frame x="-8" y="32" width="1936" height="1056" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1342812" sideWeight="0.61990213" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1342812" sideWeight="0.61990213" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2790445" sideWeight="0.49739778" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28990227" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32935324" sideWeight="0.5026022" order="10" side_tool="true" content_ui="tabs" />
@@ -1331,8 +1329,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/main_frame.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="66" column="36" selection-start-line="66" selection-start-column="36" selection-end-line="66" selection-end-column="36" />
+        <state relative-caret-position="-836">
+          <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
           <folding>
             <element signature="e#0#42#0" expanded="false" />
           </folding>

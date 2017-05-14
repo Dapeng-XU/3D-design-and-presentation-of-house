@@ -4,10 +4,6 @@
 
 // 2017年5月12日起，小规模重构代码。
 
-// 减去的长和宽的像素数，如果在浏览器中显示出来的结果没有问题，就不需要做修改
-var DEDUCTED_HEIGHT = 0;
-var DEDUCTED_WIDTH = 0;
-
 // 是否使用测试场景
 var USING_DEBUGGING_SCENE = false;
 
@@ -32,11 +28,10 @@ function convertDrawWallCoordToWebGLCoord(x) {
 }
 
 // 调试输出中最多显示记录的条数
-var DEBUG_TEXT_MAX_NUMBER = 14;
+var DEBUG_TEXT_MAX_NUMBER = 5;
 
 // 是否开启调试模式，true开启，false关闭
-var DEBUG_ON_OFF = true;
-// var DEBUG_ON_OFF = false;
+var DEBUG_ON_OFF = false;
 
 // 定义移动中的观察者与墙壁的最近距离，尚未使用
 // var MIN_DISTANCE_BETWEEN_OBSERVER_AND_WALL = 0.5;
@@ -1441,6 +1436,10 @@ var hRender = function(){    // open IIFE
     "use strict";
 
     // private attributes and methods
+    // 减去的长和宽的像素数，如果在浏览器中显示出来的结果没有问题，就不需要做修改。
+    var DEDUCTED_HEIGHT = 0;
+    var DEDUCTED_WIDTH = 0;
+
     // 画布的宽和高，涉及到绘制区域的大小，统一使用这两个变量。
     // 这两个变量在文档加载，窗口大小改变，显示左侧面板等改变画布大小的区域等情况下，都会更新。
     var canvasHeight = 1;

@@ -11,126 +11,126 @@
         "typename": "bed",
         "path": "obj-modules/bed/",
         "filename": "bed",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "椅子",
         "typename": "chair",
         "path": "obj-modules/chair/",
         "filename": "chair",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "三种桌子 之 桌子1",
         "typename": "desk",
         "path": "obj-modules/三个桌子/桌子1/",
         "filename": "桌子1",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "三种桌子 之 桌子2",
         "typename": "desk",
         "path": "obj-modules/三个桌子/桌子2/",
         "filename": "桌子2",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "桌子",
         "typename": "desk",
         "path": "obj-modules/table/",
         "filename": "table",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "餐桌",
         "typename": "desk",
         "path": "obj-modules/餐桌/",
         "filename": "餐桌",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "茶几",
         "typename": "desk",
         "path": "obj-modules/茶几/",
         "filename": "茶几",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "电脑",
         "typename": "electric",
         "path": "obj-modules/电脑/",
         "filename": "电脑",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "电视",
         "typename": "electirc",
         "path": "obj-modules/电视（源自模型云）/",
         "filename": "电视",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "空调（壁挂）",
         "typename": "electric",
         "path": "obj-modules/空调/",
         "filename": "空调",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "空调（落地）",
         "typename": "electric",
         "path": "obj-modules/空调2/",
         "filename": "空调2",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "懒人沙发",
         "typename": "sofa",
         "path": "obj-modules/懒人沙发/",
         "filename": "懒人沙发",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "沙发",
         "typename": "sofa",
         "path": "obj-modules/沙发/",
         "filename": "沙发",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "桌椅组合",
         "typename": "desk",
         "path": "obj-modules/桌椅组合/",
         "filename": "桌椅组合",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "冰箱（www.3d66.com）",
         "typename": "refrigerator",
         "path": "obj-modules/冰箱（来源：www.3d66.com）/",
         "filename": "冰箱",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "书柜（www.3d66.com）",
         "typename": "cupboard",
         "path": "obj-modules/书柜（来源：www.3d66.com）/",
         "filename": "书柜",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "书桌（www.3d66.com）",
         "typename": "desk",
         "path": "obj-modules/书桌（来源：www.3d66.com）/",
         "filename": "书桌",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       },
       {
         "chsname": "休闲椅（www.3d66.com）",
         "typename": "chair",
         "path": "obj-modules/休闲椅（来源：www.3d66.com）/",
         "filename": "休闲椅",
-        "supportingface": "floor"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.FLOOR"
       }
     ]
   }

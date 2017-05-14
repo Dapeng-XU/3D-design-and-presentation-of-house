@@ -10,77 +10,77 @@
         "typename": "surfaceplane",
         "path": "images/clock/",
         "filename": "表1.png",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "挂钟 2",
         "typename": "surfaceplane",
         "path": "images/clock/",
         "filename": "表2.png",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "挂钟 3",
         "typename": "surfaceplane",
         "path": "images/clock/",
         "filename": "表3.png",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 1",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画1.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 2",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画2.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 3",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画3.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 4",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画4.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 5",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画5.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 6",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画6.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 7",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画7.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       },
       {
         "chsname": "装饰画 8",
         "typename": "surfaceplane",
         "path": "images/picture/",
         "filename": "装饰画8.jpg",
-        "supportingface": "wall"
+        "supportingface": "hClass.TYPE_FRIENDLY_NAME.WALL"
       }
     ]
   }

@@ -2348,7 +2348,7 @@ function addObjectInMenu(supportingFace) {
     }
     // 如果定义了添加对象到哪一种平面，则执行判断
     if (SELECT_IN_MENU.supportingface) {
-        if (supportingFace.typename !== SELECT_IN_MENU.supportingface) {
+        if (supportingFace.typename !== eval(SELECT_IN_MENU.supportingface)) {
             showPopup('您不能将家具放到这种平面上。');
             return ;
         }

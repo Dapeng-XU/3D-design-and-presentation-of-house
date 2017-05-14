@@ -82,6 +82,9 @@ function errout(text, printTrace, stopRunning) {
 
 // 初始化的图形绘制
 var scene = new THREE.Scene();
+var rayCaster;
+// INTERSECTED表示当前鼠标下方可以选定的、最靠前的对象。在pickObject()中被赋值。不应该初始化这个变量。
+var INTERSECTED;
 
 // 指定要更改设置的对象，对象的修改代码位于各个JSON文件中
 var SELECTED_FOR_SETTING;
@@ -300,19 +303,6 @@ var hClass = function() {   // open IIFE
         }
     }
 
-    // 判断鼠标下方的对象是否可以删除
-    function canDelete(object3d) {
-        var i;
-        var ret = true;
-        for (i = 0; i < TYPE_BANNED_TO_DELETE.length; i++) {
-            if (object3d.typename === TYPE_BANNED_TO_DELETE[i]) {
-                ret = false;
-                break;
-            }
-        }
-        return ret;
-    }
-
     // public attributes and methods
     var publicSet = {
         // 友好的类型名称
@@ -359,15 +349,19 @@ var hClass = function() {   // open IIFE
             return ret;
         },
 
-        // 从场景中删除对象
-        deleteObjectFromScene: function() {
-            if (INTERSECTED && canDelete(INTERSECTED)) {
-                if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_SPHERE) {
-                    INTERSECTED = INTERSECTED.parent;
+        // 判断鼠标下方的对象是否可以删除
+        canDelete: function (object3d) {
+            var i;
+            var ret = true;
+            for (i = 0; i < TYPE_BANNED_TO_DELETE.length; i++) {
+                if (object3d.typename === TYPE_BANNED_TO_DELETE[i]) {
+                    ret = false;
+                    break;
                 }
-                scene.remove(INTERSECTED);
             }
+            return ret;
         }
+
     };
 
     (function initialize() {
@@ -472,7 +466,7 @@ var hEvent = function () {  // open IIFE
                     hClass.deleteObjectFromScene();
                 } else if (keyCode === 27) {
                     // Escape: 是否开启鼠标选定
-                    toggleSelectByMouse();
+                    hRayCasting.toggleSelectByMouse();
                 }
             }
         },
@@ -503,7 +497,7 @@ var hEvent = function () {  // open IIFE
         // 如果鼠标移动到了右侧面板，取消当前已有的任何选择
         mouseMove_rightPanel: function(event) {
             MOUSE_ON_RIGHT_PANEL = true;
-            deleteSelecting();
+            hRayCasting.deleteSelecting();
         },
         isMouseOnRightPanel: function() {
             return MOUSE_ON_RIGHT_PANEL;
@@ -647,23 +641,23 @@ var hEvent = function () {  // open IIFE
             if (INTERSECTED && hClass.canMove(INTERSECTED)) {
                 // 用于选定导入的OBJ模型对象的整体，或者光源的整体
                 if (INTERSECTED.parent instanceof THREE.Group) {
-                    SELECTED = INTERSECTED.parent;
+                    hRayCasting.SELECTED = INTERSECTED.parent;
                 } else {
-                    SELECTED = INTERSECTED;
+                    hRayCasting.SELECTED = INTERSECTED;
                 }
                 // 记录对象的原始位置，用于检测过度拖动
-                hEvent.objectCoordsMouseDown.copy(SELECTED.position);
+                hEvent.objectCoordsMouseDown.copy(hRayCasting.SELECTED.position);
                 // 找出射线与平面的相交位置，这里的平面是所选对象的支撑面
                 // 初始化supportingPlane，赋值为new THREE.Plane()是必须的
                 var supportingPlane = new THREE.Plane();
-                if (isSupportingFace(SELECTED)) {
+                if (isSupportingFace(hRayCasting.SELECTED)) {
                     // 企图移动支撑面
                     errout('企图移动支撑面', true);
                     return;
-                    // generateMathPlane(SELECTED, supportingPlane);
+                    // generateMathPlane(hRayCasting.SELECTED, supportingPlane);
                 } else {
                     // 企图移动对象，因此根据对象的支撑面去找到这个数学意义上的平面
-                    generateMathPlane(SELECTED.supportingFace, supportingPlane);
+                    generateMathPlane(hRayCasting.SELECTED.supportingFace, supportingPlane);
                 }
                 /* ray方法：
                  * intersectPlane ( plane, optionalTarget = null ) Vector3
@@ -671,10 +665,10 @@ var hEvent = function () {  // open IIFE
                  * optionalTarget -- Vector3    The Vector3 to store the result in, or null to create a new Vector3.
                  * Intersect this Ray with a Plane, returning the intersection point or null if there is no intersection.
                  */
-                if (rayCaster.ray.intersectPlane(supportingPlane, intersection)) {
+                if (rayCaster.ray.intersectPlane(supportingPlane, hRayCasting.intersection)) {
                     // errout('鼠标按下选定平面y=' + intersection.y);
-                    // errout('SELECTED.POSITION.Y=' + SELECTED.position.y);
-                    offset.copy(intersection).sub(SELECTED.position);
+                    // errout('hRayCasting.SELECTED.POSITION.Y=' + hRayCasting.SELECTED.position.y);
+                    hRayCasting.offset.copy(hRayCasting.intersection).sub(hRayCasting.SELECTED.position);
                 }
                 hTools.DOM_Handle.CANVAS.style.cursor = 'move';
             }
@@ -688,16 +682,16 @@ var hEvent = function () {  // open IIFE
         },
         mouseUp: function(event) {
             event.preventDefault();
-            if (SELECTED) {
+            if (hRayCasting.SELECTED) {
                 // 计算拖动前后的距离之差，防止过度拖动
-                if (hEvent.objectCoordsMouseDown.sub(SELECTED.position).length() > 20 * room.height) {
-                    scene.remove(SELECTED);
-                    SELECTED = null;
+                if (hEvent.objectCoordsMouseDown.sub(hRayCasting.SELECTED.position).length() > 20 * room.height) {
+                    scene.remove(hRayCasting.SELECTED);
+                    hRayCasting.SELECTED = null;
                     showPopup('对象被过度拖动，为方便操作，系统将自动删除这个对象。');
                     return;
                 }
-                // 拖动完成，将SELECTED置空。
-                SELECTED = null;
+                // 拖动完成，将hRayCasting.SELECTED置空。
+                hRayCasting.SELECTED = null;
             }
             hTools.DOM_Handle.CANVAS.style.cursor = 'auto';
             // 用于检测鼠标单击事件click
@@ -1204,6 +1198,8 @@ var FLOOR_VERTICES = [
 
 
 
+
+
 // -----------------------------------------------------------
 //                        相机部分
 // -----------------------------------------------------------
@@ -1457,6 +1453,253 @@ hCamera.initialize();
 
 
 
+// -------------------------------------------------------
+//           光线投射部分（The Ray Casting Part）
+// -------------------------------------------------------
+var hRayCasting = function() {  // open IIFE
+    "use strict";
+
+    // private attributes and methods
+    // 用于物体的拖动，这些变量必须初始化为相应的类型，不然赋值的过程中会出错。
+    var plane = new THREE.Plane();
+    // INTERSECTED_COLOR表示INTERSECTED对象的自发光颜色。
+    var INTERSECTED_COLOR = 0x0000ff;   // 蓝色
+
+    var selectByMouse = true;
+
+    // public attributes and methods
+    var publicSet = {
+        // 表示当前鼠标拖动选定的对象。不应该初始化这个变量。
+        SELECTED: null,
+        // 用于物体的拖动，这些变量必须初始化为相应的类型，不然赋值的过程中会出错。
+        intersection: new THREE.Vector3(),
+        offset: new THREE.Vector3(),
+        // 删除选定
+        deleteSelecting: function () {
+            if (INTERSECTED) {
+                // 用于选定导入的OBJ模型对象的整体
+                if (INTERSECTED instanceof THREE.Group) {
+                    // 由于THREE.Group类型没有定义emissive，所以必须对它的所有孩子设置emissive
+                    for (var i2 = 0; i2 < INTERSECTED.children.length; i2++) {
+                        var child = INTERSECTED.children[i2];
+                        if (child.material.emissive) {
+                            child.material.emissive.setHex(INTERSECTED.currentHex);
+                            child.currentHex = undefined;
+                        }
+                    }
+                } else {
+                    INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                    INTERSECTED.currentHex = undefined;
+                }
+            }
+            INTERSECTED = null;
+        },
+        // 切换开启/关闭鼠标选定的状态
+        toggleSelectByMouse: function (setMode) {
+            if (typeof setMode === 'boolean') {
+                selectByMouse = !setMode;
+            }
+            if (selectByMouse) {
+                // 现在关闭鼠标选定
+                selectByMouse = false;
+                this.deleteSelecting();
+            } else {
+                // 现在开启鼠标选定
+                selectByMouse = true;
+            }
+        },
+        // 用于拾取(pick)对象，并将结果存放到INTERSECTED。
+        pickObject: function () {
+            // 用于拾取(pick)对象，拾取对象之后，给对象加一个纯蓝色的表面遮罩
+            /* 可以拾取画面中的任意对象，但是，对于采用MeshBasicMaterial作为表面材质的对
+             * 象，由于其material中没有emissive属性，会出现setHex()与getHex()未定义的异
+             * 常。有效的解决方案是，在定义3D对象时，避免使用MeshBasicMaterial作为材质填
+             * 充。emissive的含义是发射的、放射的。修改这个属性为某个颜色值，可以使这个对
+             * 象自发光出那种颜色。
+             */
+            var i;
+            var child;
+            // 如果选定功能已经被toggleSelectByMouse()禁用，或者鼠标不位于左侧面板
+            if (selectByMouse === false || hEvent.isMouseOnRightPanel()) {
+                return;
+            }
+            // 从光标坐标出发，从相机视角（图像渲染的最后阶段）建立一条射线。
+            rayCaster.setFromCamera(hEvent.mousePosition, camera);
+            // 用于移动物体
+            // 如果已经处于拖动物件的状态，只需改变物体的位置position
+            if (hRayCasting.SELECTED) {
+                // 找出射线与平面的相交位置，这里的平面是所选对象的支撑面
+                // 初始化supportingPlane，赋值为new THREE.Plane()是必须的
+                var supportingPlane = new THREE.Plane();
+                if (isSupportingFace(hRayCasting.SELECTED)) {
+                    // 企图移动支撑面
+                    errout('企图移动支撑面', true);
+                    return;
+                    // generateMathPlane(hRayCasting.SELECTED, supportingPlane);
+                } else {
+                    // 企图移动对象，因此根据对象的支撑面去找到这个数学意义上的平面
+                    generateMathPlane(hRayCasting.SELECTED.supportingFace, supportingPlane);
+                }
+                // 已经得到了一个数学意义上的支撑平面supportingPlane，求交点intersection
+                var intersection = this.intersection;
+                var offset = this.offset;
+                if (rayCaster.ray.intersectPlane(supportingPlane, intersection)) {
+                    // errout('交点y=' + intersection.y);
+                    // 判断移动的物体是不是光源的辅助操作球
+                    if (hRayCasting.SELECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                        errout('尝试移动操作');
+                        hLight.moveLightGroup(hRayCasting.SELECTED, intersection.sub(offset));
+                    } else {
+                        hRayCasting.SELECTED.position.copy(intersection.sub(offset));
+                    }
+                }
+                return;
+            }
+            // 从场景中选择相交的对象，中间省略了很多步骤，Three.js为我们做了封装。
+            /* 导入的模型不能直接拾取的原因是，模型导入之后，在THREE.Mesh的外面加了一层壳THREE.Group，这在浏览器的调试窗口中下断点
+             * 可以看到。如果此处使用intersectObjects(scene.children)，则不能处理这种壳。但是使用
+             * intersectObjects(scene.children, true)就可以解决这个问题。其中的true是布尔变量，表示是否对scene（本质上是一个
+             * THREE.Object3D类型的变量）进行深度优先遍历。
+             * 普通模型直接add到scene：    scene -> Three.Mesh
+             * 导入obj模型，再add到scene： scene -> Three.Group -> Three.Mesh
+             * 注意，Three.Scene，Three.Group和Three.Mesh都继承自Three.Object3D。
+             */
+            // http://stackoverflow.com/questions/25667394/three-js-mouse-picking-object
+            var intersects = rayCaster.intersectObjects(scene.children, true);
+            // 如果选取到的相交对象的数组不空，用firstPickedObject存放实际选取到的
+            var firstPickedObject;
+            if (intersects.length > 0) {
+                // 如果有GridHelper等我们不需要的对象挡在前面，相当于没有这些对象，应该略过
+                for (i = 0; i < intersects.length; i++) {
+                    /* 排除的对象的种类：
+                     *  (1) 坐标类：网格助手、坐标助手
+                     *  (2) 灯光类：灯光、灯光范围助手
+                     */
+                    if (intersects[i].object instanceof THREE.GridHelper) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.AxisHelper) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.DirectionalLightHelper) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.HemisphereLightHelper) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.PointLightHelper) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.SpotLightHelper) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.SpotLight) {
+                        continue;
+                    } else if (intersects[i].object instanceof THREE.LineSegments) {
+                        continue;
+                    } else if (intersects[i].object.typename === hClass.TYPE_FRIENDLY_NAME.BACKGROUND){
+                        continue;
+                    } else {
+                        firstPickedObject = intersects[i].object;
+                        break;
+                    }
+                }
+                // if (firstPickedObject === undefined) {
+                //     errout('firstPickedObject未定义');
+                // }
+                if (firstPickedObject) {
+                    /* 用INTERSECTED存储了绘制上一帧时，最靠近相机的鼠标可选择的对象。如果旧的可选择的对象和这个对象相同（鼠标的移动很
+                     * 微小），那么不用做任何改变；否则，要更新已经选择的对象，让它发出纯蓝色的光，并将以前已经选择的对象和新的已经选择
+                     * 的对象更新。
+                     */
+                    if (INTERSECTED !== firstPickedObject || INTERSECTED !== firstPickedObject.parent) {
+                        // 如果有已经更换外表发光颜色的对象，即INTERSECTED已经不是空的，需要恢复这个对象的外表发光状态
+                        // 用于选定导入的OBJ模型对象或者光源对象的整体
+                        if (INTERSECTED instanceof THREE.Group) {
+                            // 使用THREE.Group的情况目前有两种：要么是导入的OBJ模型，要么是光源
+                            if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                                child = INTERSECTED.children[1];
+                                if (child.material.emissive) {
+                                    child.material.emissive.setHex(INTERSECTED.currentHex);
+                                    child.currentHex = undefined;
+                                }
+                            } else {
+                                // 由于THREE.Group类型没有定义emissive，所以必须对它的所有孩子设置emissive
+                                for (i = 0; i < INTERSECTED.children.length; i++) {
+                                    child = INTERSECTED.children[i];
+                                    if (child.material.emissive) {
+                                        child.material.emissive.setHex(INTERSECTED.currentHex);
+                                        child.currentHex = undefined;
+                                    }
+                                }
+                            }
+                        } else if (INTERSECTED) {
+                            INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                            INTERSECTED.currentHex = undefined;
+                        }
+                        INTERSECTED = firstPickedObject;
+                        // 对于新的需要发光外表的对象，设置它的外表发光
+                        // 用于选定导入的OBJ模型对象的整体或者光源对象的整体
+                        if (INTERSECTED.parent instanceof THREE.Group) {
+                            INTERSECTED = INTERSECTED.parent;
+                            // 使用THREE.Group的情况目前有两种：要么是导入的OBJ模型，要么是光源
+                            if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                                child = INTERSECTED.children[1];
+                                if (child.material.emissive) {
+                                    child.currentHex = child.material.emissive.getHex();
+                                    child.material.emissive.setHex(INTERSECTED_COLOR);
+                                }
+                            } else {
+                                // 由于THREE.Group类型没有定义emissive，所以必须对它的所有孩子设置emissive
+                                for (i = 0; i < INTERSECTED.children.length; i++) {
+                                    child = INTERSECTED.children[i];
+                                    if (child.material.emissive) {
+                                        child.currentHex = child.material.emissive.getHex();
+                                        child.material.emissive.setHex(INTERSECTED_COLOR);
+                                    }
+                                }
+                            }
+                        } else {
+                            INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+                            INTERSECTED.material.emissive.setHex(INTERSECTED_COLOR);
+                        }
+                        // if (INTERSECTED.typename) {
+                        //     errout('可选择的对象名字是' + INTERSECTED.typename);
+                        //     errout(INTERSECTED.uuid);
+                        // }
+                        /* plane的赋值和初始化。该平面以相机的
+                         * camera方法：
+                         * getWorldDirection(vector)        （参数vector可选）
+                         * It returns a vector representing the direction in which the camera is looking, in world space.
+                         * plane方法：
+                         * setFromNormalAndCoplanarPoint(normal, point)
+                         * 设置平面。该平面的方向向量为normal，经过点point。
+                         */
+                        plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal), INTERSECTED.position);
+                    }
+                    hTools.DOM_Handle.CANVAS.style.cursor = 'pointer';
+                }
+            }
+            if (!firstPickedObject) {
+                /* 不然，选取的对象数组是空的。在这一帧内，应该没有元素处于被选中的状态。那么，之前有选中的元素，应该恢复它原来的发光色
+                 * 。最后，对于下一帧来说，没有被选中的元素。
+                 */
+                this.deleteSelecting();
+                hTools.DOM_Handle.CANVAS.style.cursor = 'auto';
+            }
+        },
+        // 从场景中删除对象
+        deleteObjectFromScene: function() {
+            if (INTERSECTED && hClass.canDelete(INTERSECTED)) {
+                if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_SPHERE) {
+                    INTERSECTED = INTERSECTED.parent;
+                }
+                scene.remove(INTERSECTED);
+            }
+        }
+    };
+
+    return publicSet;
+}();    // close IIFE
+
+
+
+
+
 // -------------------------------------------------------------------------
 //                         WebGL渲染器部分
 // -------------------------------------------------------------------------
@@ -1634,7 +1877,7 @@ var hRender = function(){    // open IIFE
             // 用于统计帧速率
             hTools.countFrame();
 
-            pickObject();
+            hRayCasting.pickObject();
 
             renderer.render(scene, hCamera.obj);
         },
@@ -1686,251 +1929,10 @@ hRender.initialize();
 
 
 
-// -------------------------------------------------------
-//           光线投射部分（The Ray Casting Part）
-// -------------------------------------------------------
-var hRayCasting = function() {  // open IIFE
-    "use strict";
-
-    // private attributes and methods
-
-    // public attributes and methods
-    var publicSet = {
-
-    };
-
-    return publicSet;
-}();    // close IIFE
-
-
-var rayCaster;
-
-
-// 表示当前鼠标拖动选定的对象。不应该初始化这个变量。
-var SELECTED;
-// 用于物体的拖动，这些变量必须初始化为相应的类型，不然赋值的过程中会出错。
-var plane = new THREE.Plane();
-var intersection = new THREE.Vector3();
-var offset = new THREE.Vector3();
-// INTERSECTED表示当前鼠标下方可以选定的、最靠前的对象。在pickObject()中被赋值。不应该初始化这个变量。
-var INTERSECTED;
-// INTERSECTED_COLOR表示INTERSECTED对象的自发光颜色。
-var INTERSECTED_COLOR = 0x0000ff;   // 蓝色
-// 用于拾取(pick)对象，并将结果存放到INTERSECTED。
-function pickObject() {
-    "use strict";
-    // 用于拾取(pick)对象，拾取对象之后，给对象加一个纯蓝色的表面遮罩
-    /* 可以拾取画面中的任意对象，但是，对于采用MeshBasicMaterial作为表面材质的对
-     * 象，由于其material中没有emissive属性，会出现setHex()与getHex()未定义的异
-     * 常。有效的解决方案是，在定义3D对象时，避免使用MeshBasicMaterial作为材质填
-     * 充。emissive的含义是发射的、放射的。修改这个属性为某个颜色值，可以使这个对
-     * 象自发光出那种颜色。
-     */
-    var i;
-    var child;
-    // 如果选定功能已经被toggleSelectByMouse()禁用，或者鼠标不位于左侧面板
-    if (selectByMouse === false || hEvent.isMouseOnRightPanel()) {
-        return;
-    }
-    // 从光标坐标出发，从相机视角（图像渲染的最后阶段）建立一条射线。
-    rayCaster.setFromCamera(hEvent.mousePosition, camera);
-    // 用于移动物体
-    // 如果已经处于拖动物件的状态，只需改变物体的位置position
-    if (SELECTED) {
-        // 找出射线与平面的相交位置，这里的平面是所选对象的支撑面
-        // 初始化supportingPlane，赋值为new THREE.Plane()是必须的
-        var supportingPlane = new THREE.Plane();
-        if (isSupportingFace(SELECTED)) {
-            // 企图移动支撑面
-            errout('企图移动支撑面', true);
-            return;
-            // generateMathPlane(SELECTED, supportingPlane);
-        } else {
-            // 企图移动对象，因此根据对象的支撑面去找到这个数学意义上的平面
-            generateMathPlane(SELECTED.supportingFace, supportingPlane);
-        }
-        // 已经得到了一个数学意义上的支撑平面supportingPlane，求交点intersection
-        if (rayCaster.ray.intersectPlane(supportingPlane, intersection)) {
-            // errout('交点y=' + intersection.y);
-            // 判断移动的物体是不是光源的辅助操作球
-            if (SELECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
-                errout('尝试移动操作');
-                hLight.moveLightGroup(SELECTED, intersection.sub(offset));
-            } else {
-                SELECTED.position.copy(intersection.sub(offset));
-            }
-        }
-        return;
-    }
-    // 从场景中选择相交的对象，中间省略了很多步骤，Three.js为我们做了封装。
-    /* 导入的模型不能直接拾取的原因是，模型导入之后，在THREE.Mesh的外面加了一层壳THREE.Group，这在浏览器的调试窗口中下断点
-     * 可以看到。如果此处使用intersectObjects(scene.children)，则不能处理这种壳。但是使用
-     * intersectObjects(scene.children, true)就可以解决这个问题。其中的true是布尔变量，表示是否对scene（本质上是一个
-     * THREE.Object3D类型的变量）进行深度优先遍历。
-     * 普通模型直接add到scene：    scene -> Three.Mesh
-     * 导入obj模型，再add到scene： scene -> Three.Group -> Three.Mesh
-     * 注意，Three.Scene，Three.Group和Three.Mesh都继承自Three.Object3D。
-     */
-    // http://stackoverflow.com/questions/25667394/three-js-mouse-picking-object
-    var intersects = rayCaster.intersectObjects(scene.children, true);
-    // 如果选取到的相交对象的数组不空，用firstPickedObject存放实际选取到的
-    var firstPickedObject;
-    if (intersects.length > 0) {
-        // 如果有GridHelper等我们不需要的对象挡在前面，相当于没有这些对象，应该略过
-        for (i = 0; i < intersects.length; i++) {
-            /* 排除的对象的种类：
-             *  (1) 坐标类：网格助手、坐标助手
-             *  (2) 灯光类：灯光、灯光范围助手
-             */
-            if (intersects[i].object instanceof THREE.GridHelper) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.AxisHelper) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.DirectionalLightHelper) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.HemisphereLightHelper) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.PointLightHelper) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.SpotLightHelper) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.SpotLight) {
-                continue;
-            } else if (intersects[i].object instanceof THREE.LineSegments) {
-                continue;
-            } else if (intersects[i].object.typename === hClass.TYPE_FRIENDLY_NAME.BACKGROUND){
-                continue;
-            } else {
-                firstPickedObject = intersects[i].object;
-                break;
-            }
-        }
-        // if (firstPickedObject === undefined) {
-        //     errout('firstPickedObject未定义');
-        // }
-        if (firstPickedObject) {
-            /* 用INTERSECTED存储了绘制上一帧时，最靠近相机的鼠标可选择的对象。如果旧的可选择的对象和这个对象相同（鼠标的移动很
-             * 微小），那么不用做任何改变；否则，要更新已经选择的对象，让它发出纯蓝色的光，并将以前已经选择的对象和新的已经选择
-             * 的对象更新。
-             */
-            if (INTERSECTED !== firstPickedObject || INTERSECTED !== firstPickedObject.parent) {
-                // 如果有已经更换外表发光颜色的对象，即INTERSECTED已经不是空的，需要恢复这个对象的外表发光状态
-                // 用于选定导入的OBJ模型对象或者光源对象的整体
-                if (INTERSECTED instanceof THREE.Group) {
-                    // 使用THREE.Group的情况目前有两种：要么是导入的OBJ模型，要么是光源
-                    if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
-                        child = INTERSECTED.children[1];
-                        if (child.material.emissive) {
-                            child.material.emissive.setHex(INTERSECTED.currentHex);
-                            child.currentHex = undefined;
-                        }
-                    } else {
-                        // 由于THREE.Group类型没有定义emissive，所以必须对它的所有孩子设置emissive
-                        for (i = 0; i < INTERSECTED.children.length; i++) {
-                            child = INTERSECTED.children[i];
-                            if (child.material.emissive) {
-                                child.material.emissive.setHex(INTERSECTED.currentHex);
-                                child.currentHex = undefined;
-                            }
-                        }
-                    }
-                } else if (INTERSECTED) {
-                    INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-                    INTERSECTED.currentHex = undefined;
-                }
-                INTERSECTED = firstPickedObject;
-                // 对于新的需要发光外表的对象，设置它的外表发光
-                // 用于选定导入的OBJ模型对象的整体或者光源对象的整体
-                if (INTERSECTED.parent instanceof THREE.Group) {
-                    INTERSECTED = INTERSECTED.parent;
-                    // 使用THREE.Group的情况目前有两种：要么是导入的OBJ模型，要么是光源
-                    if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
-                        child = INTERSECTED.children[1];
-                        if (child.material.emissive) {
-                            child.currentHex = child.material.emissive.getHex();
-                            child.material.emissive.setHex(INTERSECTED_COLOR);
-                        }
-                    } else {
-                        // 由于THREE.Group类型没有定义emissive，所以必须对它的所有孩子设置emissive
-                        for (i = 0; i < INTERSECTED.children.length; i++) {
-                            child = INTERSECTED.children[i];
-                            if (child.material.emissive) {
-                                child.currentHex = child.material.emissive.getHex();
-                                child.material.emissive.setHex(INTERSECTED_COLOR);
-                            }
-                        }
-                    }
-                } else {
-                    INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                    INTERSECTED.material.emissive.setHex(INTERSECTED_COLOR);
-                }
-                // if (INTERSECTED.typename) {
-                //     errout('可选择的对象名字是' + INTERSECTED.typename);
-                //     errout(INTERSECTED.uuid);
-                // }
-                /* plane的赋值和初始化。该平面以相机的
-                 * camera方法：
-                 * getWorldDirection(vector)        （参数vector可选）
-                 * It returns a vector representing the direction in which the camera is looking, in world space.
-                 * plane方法：
-                 * setFromNormalAndCoplanarPoint(normal, point)
-                 * 设置平面。该平面的方向向量为normal，经过点point。
-                 */
-                plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal), INTERSECTED.position);
-            }
-            hTools.DOM_Handle.CANVAS.style.cursor = 'pointer';
-        }
-    }
-    if (!firstPickedObject) {
-        /* 不然，选取的对象数组是空的。在这一帧内，应该没有元素处于被选中的状态。那么，之前有选中的元素，应该恢复它原来的发光色
-         * 。最后，对于下一帧来说，没有被选中的元素。
-         */
-        deleteSelecting();
-        hTools.DOM_Handle.CANVAS.style.cursor = 'auto';
-    }
-}
 
 
 
-// 删除选定
-function deleteSelecting() {
-    "use strict";
-    if (INTERSECTED) {
-        // 用于选定导入的OBJ模型对象的整体
-        if (INTERSECTED instanceof THREE.Group) {
-            // 由于THREE.Group类型没有定义emissive，所以必须对它的所有孩子设置emissive
-            for (var i2 = 0; i2 < INTERSECTED.children.length; i2++) {
-                var child2 = INTERSECTED.children[i2];
-                if (child2.material.emissive) {
-                    child2.material.emissive.setHex(INTERSECTED.currentHex);
-                    child2.currentHex = undefined;
-                }
-            }
-        } else {
-            INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
-            INTERSECTED.currentHex = undefined;
-        }
-    }
 
-    INTERSECTED = null;
-}
-
-var selectByMouse = true;
-// 切换开启/关闭鼠标选定的状态
-function toggleSelectByMouse(setMode) {
-    "use strict";
-    if (typeof setMode === 'boolean') {
-        selectByMouse = !setMode;
-    }
-    if (selectByMouse) {
-        // 现在关闭鼠标选定
-        selectByMouse = false;
-        deleteSelecting();
-    } else {
-        // 现在开启鼠标选定
-        selectByMouse = true;
-    }
-}
 
 
 // 加载JSON文件，这个函数不应该被调用，仅作参考

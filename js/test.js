@@ -62,7 +62,7 @@ var IIFE_public_private = function () {  // open IIFE
     return publicSet;
 }();    // close IIFE
 
-QUnit.test('IIFE_public_private()', function(assert) {
+QUnit.test('IIFE_public_private', function(assert) {
     "use strict";
     assert.equal(IIFE_public_private.showVal1() , 1, 'showVal1()');
     assert.equal(IIFE_public_private.showVal2() , 2, 'showVal2()');
@@ -75,6 +75,51 @@ QUnit.test('IIFE_public_private()', function(assert) {
     assert.equal(IIFE_public_private.showVal4() , 4, 'showVal4()');
     assert.equal(IIFE_public_private.showVal5() , undefined, 'showVal5()');
     assert.equal(IIFE_public_private.showVal6() , 6, 'showVal6()');
+});
+
+
+
+
+
+
+// ------------------------------------------------------
+//               测试CPU的浮点乘法运算速度
+// ------------------------------------------------------
+var multiplySpeed = function () {
+    "use strict";
+
+    var LENGTH = 10000;
+    var LEAST_FPS = 50;
+
+    var list = [];
+
+    var publicSet = {
+        test: function () {
+            var beginTimer = new Date();
+            var t = 1;
+            for (var i = 0; i < LENGTH; i++) {
+                t *= list[i];
+            }
+            var endTimer = new Date();
+            var intervalInMilliseconds = endTimer.getTime() - beginTimer.getTime();
+            window.console.log(LENGTH + ' times multiplications cost ' + intervalInMilliseconds + 'ms.');
+            return 1000 / LEAST_FPS > intervalInMilliseconds;
+        }
+    };
+
+    (function initialize() {
+        list = [];
+        for (var i = 0; i < LENGTH; i++) {
+            list.push( Math.pow(10, Math.random() * 2 - 1) );
+        }
+    }());
+
+    return publicSet;
+}();
+
+QUnit.test('Collision detection speed test.', function(assert) {
+    "use strict";
+    assert.ok(multiplySpeed.test(), 'Passed. ');
 });
 
 

@@ -80,6 +80,9 @@ function errout(text, printTrace, stopRunning) {
     }
 }
 
+// 初始化的图形绘制
+var scene = new THREE.Scene();
+
 // 指定要更改设置的对象，对象的修改代码位于各个JSON文件中
 var SELECTED_FOR_SETTING;
 
@@ -183,6 +186,11 @@ var hTools = function(){
         // countFrame()：统计帧速率
         countFrame: function () {
             frameCount++;
+        },
+        DOM_Handle: {
+            CANVAS: document.getElementById('canvas'),
+            LEFT_PANEL: document.getElementById('left_panel'),
+            RIGHT_PANEL: document.getElementById('right_panel')
         }
     };
 
@@ -414,6 +422,8 @@ var hEvent = function () {  // open IIFE
     // 判定为鼠标单击事件的最大拖动半径范围
     var MAX_MOVE_RADUIS = 9;
     var SQUARE_OF_MAX_MOVE_RADUIS = 0;
+    // 鼠标是否移动到了右侧面板
+    var MOUSE_ON_RIGHT_PANEL = false;
 
     // public attributes and methods
     var publicSet = {
@@ -466,7 +476,7 @@ var hEvent = function () {  // open IIFE
                 }
             }
         },
-        mouseMove: function(event) {
+        mouseMove_leftPanel: function(event) {
             event.preventDefault();
             /* JavaScript中，clientX、offsetX和screenX的区别：
              * clientX：光标相对于浏览器窗口可视区域的X坐标（也称为窗口坐标）
@@ -489,6 +499,14 @@ var hEvent = function () {  // open IIFE
             /* 处理相交对象的代码可以放在mousemove事件中，也可以放在pickObject()函数中以便被render()函数调用。
              * 放在render()函数中，调用的频率会更高，相应地会更加影响系统的性能。
              */
+        },
+        // 如果鼠标移动到了右侧面板，取消当前已有的任何选择
+        mouseMove_rightPanel: function(event) {
+            MOUSE_ON_RIGHT_PANEL = true;
+            deleteSelecting();
+        },
+        isMouseOnRightPanel: function() {
+            return MOUSE_ON_RIGHT_PANEL;
         },
         // 重要提醒：在已经定义了onmousedown、onmouseup事件的情况下，应避免再定义事件onclick，否则会出现难以理解的事情！
         mouseClick: function() {
@@ -658,7 +676,7 @@ var hEvent = function () {  // open IIFE
                     // errout('SELECTED.POSITION.Y=' + SELECTED.position.y);
                     offset.copy(intersection).sub(SELECTED.position);
                 }
-                canv.style.cursor = 'move';
+                hTools.DOM_Handle.CANVAS.style.cursor = 'move';
             }
 
             // 用于检测鼠标单击事件click
@@ -681,7 +699,7 @@ var hEvent = function () {  // open IIFE
                 // 拖动完成，将SELECTED置空。
                 SELECTED = null;
             }
-            canv.style.cursor = 'auto';
+            hTools.DOM_Handle.CANVAS.style.cursor = 'auto';
             // 用于检测鼠标单击事件click
             var isClick = false;
             mouseCoordsMouseUp.set(event.clientX, event.clientY);
@@ -706,12 +724,22 @@ var hEvent = function () {  // open IIFE
         initialize: function () {
             // 鼠标事件的设置（除了滚轮）
             SQUARE_OF_MAX_MOVE_RADUIS = MAX_MOVE_RADUIS * MAX_MOVE_RADUIS;
-            document.getElementById('left_panel').onmousemove = function (event) {publicSet.mouseMove(event);};
-            document.getElementById('left_panel').onmousedown = function (event) {publicSet.mouseDown(event);};
-            document.getElementById('left_panel').onmouseup = function (event) {publicSet.mouseUp(event);};
+            hTools.DOM_Handle.LEFT_PANEL.onmousemove = function (event) {publicSet.mouseMove_leftPanel(event);};
+            hTools.DOM_Handle.LEFT_PANEL.onmousedown = function (event) {publicSet.mouseDown(event);};
+            hTools.DOM_Handle.LEFT_PANEL.onmouseup = function (event) {publicSet.mouseUp(event);};
+            hTools.DOM_Handle.RIGHT_PANEL.onmousemove = function (event){publicSet.mouseMove_rightPanel(event);};
 
             // 键盘事件的设置
             document.onkeydown = function (event) {publicSet.keyDown(event);};
+
+            // 阻止从选择面板中拖拽，优化UI体验
+            hTools.DOM_Handle.RIGHT_PANEL.ondragstart = function () {return false;};
+
+            // 禁止用户选择文本，优化UI体验
+            // 浏览器限制：仅在IE和Chrome中有效，在Firefox中无效。
+            document.onselectstart = function () {return false;};
+
+
 
             // 加载完成之后自动运行的事件设置
             $(document).ready(function () {
@@ -1479,14 +1507,7 @@ var hRender = function(){    // open IIFE
         getCanvasWidth: function (){
             return canvasWidth;
         },
-        // globalInitialize()：负责全局初始化
-        globalInitialize: function () {
-            // 禁止用户选择文本，优化UI体验
-            // 浏览器限制：仅在IE和Chrome中有效，在Firefox中无效。
-            document.onselectstart = function () {
-                return false;
-            };
-
+        initialize: function () {
             // 每次窗口的大小发生改变时，也改变画布的大小
             window.onresize = hRender.canvasResize;
         },
@@ -1523,7 +1544,7 @@ var hRender = function(){    // open IIFE
             // 初始化渲染器为使用WebGL的绑定到ID为“canvas”的元素，参数使用JSON表示。
             renderer = new THREE.WebGLRenderer({
                 antialias: true,
-                canvas: canv
+                canvas: hTools.DOM_Handle.CANVAS
             });
 
             // 重设渲染器的大小为窗口大小；否则，默认的渲染大小很小，在屏幕上显示出大的块状。
@@ -1659,16 +1680,30 @@ var hRender = function(){    // open IIFE
 
     return publicSet;
 }();    // close IIFE
-hRender.globalInitialize();
+hRender.initialize();
 
 
 
 
 
-// 初始化的图形绘制
-var scene = new THREE.Scene();
+// -------------------------------------------------------
+//           光线投射部分（The Ray Casting Part）
+// -------------------------------------------------------
+var hRayCasting = function() {  // open IIFE
+    "use strict";
+
+    // private attributes and methods
+
+    // public attributes and methods
+    var publicSet = {
+
+    };
+
+    return publicSet;
+}();    // close IIFE
+
+
 var rayCaster;
-var canv = document.getElementById('canvas');
 
 
 // 表示当前鼠标拖动选定的对象。不应该初始化这个变量。
@@ -1693,12 +1728,8 @@ function pickObject() {
      */
     var i;
     var child;
-    // 如果选定功能已经被toggleSelectByMouse()禁用
-    if (selectByMouse === false) {
-        return;
-    }
-    // 如果鼠标不位于左侧面板
-    if (MOUSE_ON_RIGHT_PANEL) {
+    // 如果选定功能已经被toggleSelectByMouse()禁用，或者鼠标不位于左侧面板
+    if (selectByMouse === false || hEvent.isMouseOnRightPanel()) {
         return;
     }
     // 从光标坐标出发，从相机视角（图像渲染的最后阶段）建立一条射线。
@@ -1847,7 +1878,7 @@ function pickObject() {
                  */
                 plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(plane.normal), INTERSECTED.position);
             }
-            canv.style.cursor = 'pointer';
+            hTools.DOM_Handle.CANVAS.style.cursor = 'pointer';
         }
     }
     if (!firstPickedObject) {
@@ -1855,17 +1886,11 @@ function pickObject() {
          * 。最后，对于下一帧来说，没有被选中的元素。
          */
         deleteSelecting();
-        canv.style.cursor = 'auto';
+        hTools.DOM_Handle.CANVAS.style.cursor = 'auto';
     }
 }
 
-var MOUSE_ON_RIGHT_PANEL = false;
-// 如果鼠标移动到了右侧面板，取消当前已有的任何选择
-document.getElementById('right_panel').onmousemove = function (event){
-    "use strict";
-    MOUSE_ON_RIGHT_PANEL = true;
-    deleteSelecting();
-};
+
 
 // 删除选定
 function deleteSelecting() {
@@ -2025,11 +2050,7 @@ function loadSidePanel(location) {
 
 
 
-// 阻止从选择面板中拖拽，优化UI体验
-document.getElementById('right_panel').ondragstart = function () {
-    "use strict";
-    return false;
-};
+
 
 var popupText = $('#popup_text');
 

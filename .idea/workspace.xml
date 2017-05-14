@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2568" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2639" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2015" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2162" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2088" />
-    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2833" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2589" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2660" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2040" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2183" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2109" />
+    <bookmark url="file://$PROJECT_DIR$/js/main_frame.js" line="2854" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="aa4a6a10-be8a-494d-bc0b-ca9e4429a0ae" name="Default" comment="">
@@ -34,24 +34,46 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="light-configure.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/json/pagedata/light-configure.json">
+      <file leaf-file-name="main_frame.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/js/main_frame.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="361">
-              <caret line="19" column="1" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+            <state relative-caret-position="457">
+              <caret line="2350" column="40" selection-start-line="2350" selection-start-column="40" selection-end-line="2350" selection-end-column="40" />
+              <folding>
+                <element signature="e#0#42#0" expanded="false" />
+                <marker date="1494772056465" expanded="true" signature="5268:5431" ph="//..." />
+                <marker date="1494772056465" expanded="true" signature="28128:28296" ph="//..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="obj-add.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/pagedata/obj-add.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="247">
+              <caret line="13" column="26" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="33" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="main_frame.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/js/main_frame.js">
+      <file leaf-file-name="main_page.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/main_page.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-836">
-              <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
-              <folding>
-                <element signature="e#0#42#0" expanded="false" />
-              </folding>
+            <state relative-caret-position="-280">
+              <caret line="33" column="14" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/index.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="860">
+              <caret line="86" column="41" selection-start-line="86" selection-start-column="41" selection-end-line="86" selection-end-column="41" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -114,7 +136,6 @@
         <option value="$PROJECT_DIR$/json/pagedata/spotlight-modify.json" />
         <option value="$PROJECT_DIR$/json/pagedata/floor-texture.json" />
         <option value="$PROJECT_DIR$/js/canvas_WallS.js" />
-        <option value="$PROJECT_DIR$/json/pagedata/obj-add.json" />
         <option value="$PROJECT_DIR$/json/pagedata/wall-modify.json" />
         <option value="$PROJECT_DIR$/json/pagedata/surfaceplane-modify.json" />
         <option value="$PROJECT_DIR$/json/pagedata/floor-modify.json" />
@@ -130,6 +151,7 @@
         <option value="$PROJECT_DIR$/main_page.html" />
         <option value="$PROJECT_DIR$/style/design.css" />
         <option value="$PROJECT_DIR$/index.html" />
+        <option value="$PROJECT_DIR$/json/pagedata/obj-add.json" />
         <option value="$PROJECT_DIR$/js/main_frame.js" />
       </list>
     </option>
@@ -260,66 +282,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="style" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="json" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="json" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="pagedata" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3D-design-and-presentation-of-house" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="js" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -541,14 +503,7 @@
       <workItem from="1494571299538" duration="663000" />
       <workItem from="1494571996323" duration="48001000" />
       <workItem from="1494740075234" duration="741000" />
-      <workItem from="1494758383101" duration="10864000" />
-    </task>
-    <task id="LOCAL-00097" summary="解除对dat.gui的依赖">
-      <created>1472990910462</created>
-      <option name="number" value="00097" />
-      <option name="presentableId" value="LOCAL-00097" />
-      <option name="project" value="LOCAL" />
-      <updated>1472990910462</updated>
+      <workItem from="1494758383101" duration="13876000" />
     </task>
     <task id="LOCAL-00098" summary="增加两个TODO标记，说明下一步的目标">
       <created>1472993410951</created>
@@ -886,11 +841,18 @@
       <option name="project" value="LOCAL" />
       <updated>1494768989582</updated>
     </task>
-    <option name="localTasksCounter" value="146" />
+    <task id="LOCAL-00146" summary="Small update.">
+      <created>1494769276660</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1494769276661</updated>
+    </task>
+    <option name="localTasksCounter" value="147" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="658803000" />
+    <option name="totallyTimeSpent" value="661815000" />
   </component>
   <component name="TodoView" selected-index="4">
     <todo-panel id="selected-file">
@@ -905,14 +867,14 @@
     <frame x="-8" y="32" width="1936" height="1056" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1342812" sideWeight="0.61990213" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17272249" sideWeight="0.61990213" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2790445" sideWeight="0.49739778" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28990227" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32935324" sideWeight="0.5026022" order="10" side_tool="true" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2529859" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.35504887" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29259259" sideWeight="0.48550186" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2365416" sideWeight="0.49739778" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19747235" sideWeight="0.7318008" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15323855" sideWeight="0.7318008" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.504886" sideWeight="0.66245353" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.14944237" sideWeight="0.38009787" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.57585645" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -975,7 +937,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="增加模型，删除不需要的引用" />
     <MESSAGE value="增加门和窗户的贴图" />
     <MESSAGE value="家具模型可以预览" />
     <MESSAGE value="可以添加和修改挂饰" />
@@ -1000,7 +961,8 @@
     <MESSAGE value="Add the calculation speed test for collision detection." />
     <MESSAGE value="Add the copyright text." />
     <MESSAGE value="Reconstruct the light part and the classification part." />
-    <option name="LAST_COMMIT_MESSAGE" value="Reconstruct the light part and the classification part." />
+    <MESSAGE value="Small update." />
+    <option name="LAST_COMMIT_MESSAGE" value="Small update." />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.8510029" />
   </component>
   <component name="XDebuggerManager">
@@ -1119,13 +1081,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="323">
           <caret line="17" column="7" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/pagedata/obj-add.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2242">
-          <caret line="118" column="33" selection-start-line="118" selection-start-column="33" selection-end-line="118" selection-end-column="33" />
         </state>
       </provider>
     </entry>
@@ -1295,26 +1250,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1976">
-          <caret line="104" column="27" selection-start-line="104" selection-start-column="27" selection-end-line="104" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/style/3d-scene.css">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1045">
           <caret line="55" column="0" selection-start-line="55" selection-start-column="0" selection-end-line="61" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main_page.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="627">
-          <caret line="33" column="14" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
           <folding />
         </state>
       </provider>
@@ -1327,12 +1266,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="860">
+          <caret line="86" column="41" selection-start-line="86" selection-start-column="41" selection-end-line="86" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main_page.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-280">
+          <caret line="33" column="14" selection-start-line="33" selection-start-column="14" selection-end-line="33" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/pagedata/obj-add.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="13" column="26" selection-start-line="13" selection-start-column="26" selection-end-line="13" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/main_frame.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-836">
-          <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
+        <state relative-caret-position="457">
+          <caret line="2350" column="40" selection-start-line="2350" selection-start-column="40" selection-end-line="2350" selection-end-column="40" />
           <folding>
             <element signature="e#0#42#0" expanded="false" />
+            <marker date="1494772056465" expanded="true" signature="5268:5431" ph="//..." />
+            <marker date="1494772056465" expanded="true" signature="28128:28296" ph="//..." />
           </folding>
         </state>
       </provider>

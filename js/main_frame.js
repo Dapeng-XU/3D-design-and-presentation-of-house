@@ -2,45 +2,7 @@
  * Created by Dapegn on 2016/8/15.
  */
 
-// 2017年5月12日，小规模重构代码。
-
-/* ===========================
- *   代码阅读提示
- * ===========================
- *
- *     此脚本文件中定义的函数非常多，为了方便大家阅读，在这里写一些阅读技巧。如有疑问，及时与我讨论！
- *
- *     关键性注释——解释操作不当会导致一些难以理解的错误的注释，用“重要提醒”在代码中标出。
- *
- *     [ 操作提示 ]
- *     A.  前提是使用WebStorm打开这个脚本文件。
- *     B.  开启结构窗口。方法是：
- *             1. 在菜单栏中 'View' -> 'Tool Windows' -> 'Structure'，这样就有了结构窗口，可以定位属性和方法。（Alt+7）
- *             2. 在Structure窗口的上方工具栏中，点击'Collapse All'。所有代码折叠以后，可以清楚地看到文档的结构。
- *     C.  Ctrl+L可以方便定位到某一行代码。Ctrl+F进行搜索。
- *     D.  选择一个属性或者函数的名称以后，在右键菜单中有'Find Usages'（查找属性和方法被调用的位置），以及'Go to'菜单中的
- *     'Implementation(s)'（跳转到实现的位置）和'Declaration'（跳转到声明的位置）。用好IDE，事半功倍。
- *     E.  使用TO-DO标签（待修改的标记）。在窗口下方有'6: TO-DO'（Alt+6），可以查看当前文件中已有的TO-DO标签。定义TO-DO标签的
- *     方法也很简单，在注释中直接写就行了。
- *
- *     [ 代码风格 ]
- *     1. 为调用方便，WebGL绘制的基本组件（场景、相机、渲染器等）声明为全局变量，这些变量有且只能有一个。
- *     2. 常量统一使用大写字母声明（JS是弱类型的语言，没有限制变量不能修改的关键字）。
- *     3. 在第一次调用第三方库的地方会有说明。
- *     4. 将渲染图像的各部分独立成为函数，便于接下来编写更复杂的功能。主要模块及他们的调用关系如下：
- *          loadFloor() -> loadTeapot() -> loadWallAndWindow() -> setLight() -> render() -> initCamera()
- *                |                                                               |             |
- *          loadBasicShape() <- loadApartment() <- initGraphics()                 +---<<---pickObject()
- *                                                       |
- *                            BEGIN -> redraw() -> canvasResize()
- *        loadBasicShape()和loadTeapot()属于调试、示例，后续将删除。loadApartment()、loadWallAndWindow()、setLight()是将要
- *        写的。loadFloor()和loadWallAndWindow()应该是可以合并的，其实户型文件的加载可以看成三步走：
-*          从某个URL下载文件 -> 读取并解析这个数据文件 -> 按照解析出来的数据，绘制图形（可以是OBJ模型）
-*        这些步骤看似复杂，但是能够进一步简化。
-*     5. 尽量减少匿名函数的使用。
-*     6. 如果重绘整个场景，运算量将十分得大。应避免对整个场景的重绘。取而代之，我们可以采用仅重绘所需部件的方法。以下几乎所有
-*     的重绘都将使用这一方式：按照名称来找到那个已经定义了的对象，然后从场景变量中删除这个对象，最后把新的对象添加进去。
-*/
+// 2017年5月12日起，小规模重构代码。
 
 // 减去的长和宽的像素数，如果在浏览器中显示出来的结果没有问题，就不需要做修改
 var DEDUCTED_HEIGHT = 0;
@@ -123,6 +85,27 @@ function errout(text, printTrace, stopRunning) {
     }
 }
 
+// 指定要更改设置的对象，对象的修改代码位于各个JSON文件中
+var SELECTED_FOR_SETTING;
+
+// 渲染使用的表面材质类型
+var MATERIAL_TYPE = {
+    PHONG: 0,
+    LAMBERT: 1
+};
+
+// 定义房间的长、宽、高，以厘米为单位。
+// 这里使用的大括号是JSON的规范。
+var room = {
+    N_S_length: 20,
+    E_W_length: 20,
+    height: 30,              // 房间的高度
+    windowTop: 25,           // 窗户的底边高度
+    windowBottom: 9,        // 窗户的顶边高度
+    doorTop: 22,             // 门的高度
+    initialX: 1,            // 初始的X坐标，用于“游览”模式的观察，（X,Z）就是观察者初始的平面坐标
+    initialZ: 1             // 初始的Z坐标，用于“游览”模式的观察
+};
 
 
 
@@ -219,30 +202,6 @@ var hTools = function(){
 
 
 
-// 渲染使用的表面材质类型
-var MATERIAL_TYPE = {
-    PHONG: 0,
-    LAMBERT: 1
-};
-
-// 定义房间的长、宽、高，以厘米为单位。
-// 这里使用的大括号是JSON的规范。
-var room = {
-    N_S_length: 20,
-    E_W_length: 20,
-    height: 30,              // 房间的高度
-    windowTop: 25,           // 窗户的底边高度
-    windowBottom: 9,        // 窗户的顶边高度
-    doorTop: 22,             // 门的高度
-    initialX: 1,            // 初始的X坐标，用于“游览”模式的观察，（X,Z）就是观察者初始的平面坐标
-    initialZ: 1             // 初始的Z坐标，用于“游览”模式的观察
-};
-
-
-
-
-
-
 // --------------------------------------------------------------
 //                        侧边菜单部分
 // --------------------------------------------------------------
@@ -298,69 +257,153 @@ var hMenu = function() {
 
 
 
-
-function keyDown(event) {
+// ---------------------------------------------------------
+//                    物体分类和处理部分
+// ---------------------------------------------------------
+var hClass = function() {   // open IIFE
     "use strict";
 
-}
+    // private attributes and methods
+    // 放大系数
+    var ZOOM_IN_FACTOR = 1.0400;
+    // 禁止缩放的对象列表
+    var TYPE_BANNED_TO_ZOOM = null;
+    var TYPE_BANNED_TO_MOVE = null;
+    var TYPE_BANNED_TO_DELETE = null;
 
-// 禁止缩放的对象列表
-var BANNED_ZOOMING = [
-    'floor',
-    'ceiling',
-    'wall',
-    'lightsphere',
-    'lighthelper',
-    'background',
-    'door',
-    'window',
-    'surfaceplane'
-];
-// 判断是否可以缩放
-function canZoom(object3d) {
-    "use strict";
-    var i;
-    var ret = true;
-    for (i = 0; i < BANNED_ZOOMING.length; i++) {
-        if (object3d.typename === BANNED_ZOOMING[i]) {
-            ret = false;
+    // canZoom()：判断是否可以缩放
+    function canZoom(object3d) {
+        var i;
+        var ret = true;
+        for (i = 0; i < TYPE_BANNED_TO_ZOOM.length; i++) {
+            if (object3d.typename === TYPE_BANNED_TO_ZOOM[i]) {
+                ret = false;
+            }
+        }
+        return ret;
+    }
+
+    // 执行缩放
+    function zoom(factor) {
+        if (INTERSECTED && canZoom(INTERSECTED)) {
+            // 如果缩放因子没有定义，需要先定义
+            if (!INTERSECTED.scaleFactor) {
+                INTERSECTED.scaleFactor = 1;
+            }
+            // 在乘以新的缩放因子以前，先清除旧的缩放因子的影响。
+            INTERSECTED.scale.multiplyScalar(1 / INTERSECTED.scaleFactor);
+            INTERSECTED.scaleFactor *= factor;
+            INTERSECTED.scale.multiplyScalar(INTERSECTED.scaleFactor);
         }
     }
-    return ret;
-}
-// 放大系数
-var ZOOM_IN_FACTOR = 1.0400;
-// 放大选定的对象
-function zoomIn() {
-    "use strict";
-    if (INTERSECTED && canZoom(INTERSECTED)) {
-        // 如果缩放因子没有定义，需要先定义
-        if (!INTERSECTED.scaleFactor) {
-            INTERSECTED.scaleFactor = 1;
-        }
-        // 在乘以新的缩放因子以前，先清除旧的缩放因子的影响。
-        INTERSECTED.scale.multiplyScalar(1 / INTERSECTED.scaleFactor);
-        INTERSECTED.scaleFactor *= ZOOM_IN_FACTOR;
-        INTERSECTED.scale.multiplyScalar(INTERSECTED.scaleFactor);
-    }
-}
 
-// 缩小系数
-var ZOOM_OUT_FACTOR = 1 / ZOOM_IN_FACTOR;
-// 缩小选定的对象
-function zoomOut() {
-    "use strict";
-    if (INTERSECTED && canZoom(INTERSECTED)) {
-        // 如果缩放因子没有定义，需要先定义
-        if (!INTERSECTED.scaleFactor) {
-            INTERSECTED.scaleFactor = 1;
+    // 判断鼠标下方的对象是否可以删除
+    function canDelete(object3d) {
+        var i;
+        var ret = true;
+        for (i = 0; i < TYPE_BANNED_TO_DELETE.length; i++) {
+            if (object3d.typename === TYPE_BANNED_TO_DELETE[i]) {
+                ret = false;
+                break;
+            }
         }
-        // 在乘以新的缩放因子以前，先清除旧的缩放因子的影响。
-        INTERSECTED.scale.multiplyScalar(1 / INTERSECTED.scaleFactor);
-        INTERSECTED.scaleFactor *= ZOOM_OUT_FACTOR;
-        INTERSECTED.scale.multiplyScalar(INTERSECTED.scaleFactor);
+        return ret;
     }
-}
+
+    // public attributes and methods
+    var publicSet = {
+        // 友好的类型名称
+        TYPE_FRIENDLY_NAME: {
+            BASIC: 'Basic Shape (ONLY FOR TEST)',
+            LIGHT_GROUP: 'Light Group',
+            LIGHT_SPHERE: 'Light Sphere',
+            LIGHT_HELPER: 'Light Helper',
+            LIGHT_TARGET: 'Light Target',
+            BACKGROUND: 'Background Image',
+            SURFACE_PLANE: 'Surface',
+            FLOOR: 'Floor',
+            CEILING: 'Ceiling',
+            WALL: 'Wall',
+            WINDOW: 'Furnishing: Window',
+            DOOR: 'Furnishing: Door',
+            DESK: 'Furnishing: Desk'
+        },
+        // 规定的文件名称
+        TYPE_FILE_NAME: {
+            BASIC: 'basic',
+            WINDOW: 'window',
+            DOOR: 'door'
+        },
+
+        // zoomIn()：放大选定的对象
+        zoomIn: function () {
+            zoom(ZOOM_IN_FACTOR);
+        },
+        // zoomOut()：缩小选定的对象
+        zoomOut: function () {
+            zoom(1 / ZOOM_IN_FACTOR);
+        },
+
+        // 判断鼠标下方的对象是否可以移动
+        canMove: function (object3d) {
+            var i;
+            var ret = true;
+            for (i = 0; i < TYPE_BANNED_TO_MOVE.length; i++) {
+                if (object3d.typename === TYPE_BANNED_TO_MOVE[i]) {
+                    ret = false;
+                }
+            }
+            return ret;
+        },
+
+        // 从场景中删除对象
+        deleteObjectFromScene: function() {
+            if (INTERSECTED && canDelete(INTERSECTED)) {
+                if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_SPHERE) {
+                    INTERSECTED = INTERSECTED.parent;
+                }
+                scene.remove(INTERSECTED);
+            }
+        }
+    };
+
+    (function initialize() {
+        TYPE_BANNED_TO_ZOOM = [
+            publicSet.TYPE_FRIENDLY_NAME.FLOOR,
+            publicSet.TYPE_FRIENDLY_NAME.CEILING,
+            publicSet.TYPE_FRIENDLY_NAME.WALL,
+            publicSet.TYPE_FRIENDLY_NAME.LIGHT_SPHERE,
+            publicSet.TYPE_FRIENDLY_NAME.LIGHT_HELPER,
+            publicSet.TYPE_FRIENDLY_NAME.BACKGROUND,
+            publicSet.TYPE_FRIENDLY_NAME.DOOR,
+            publicSet.TYPE_FRIENDLY_NAME.WINDOW,
+            publicSet.TYPE_FRIENDLY_NAME.SURFACE_PLANE
+        ];
+        TYPE_BANNED_TO_MOVE = [
+            publicSet.TYPE_FRIENDLY_NAME.FLOOR,
+            publicSet.TYPE_FRIENDLY_NAME.CEILING,
+            publicSet.TYPE_FRIENDLY_NAME.WALL,
+            publicSet.TYPE_FRIENDLY_NAME.LIGHT_HELPER,
+            publicSet.TYPE_FRIENDLY_NAME.BACKGROUND,
+            publicSet.TYPE_FRIENDLY_NAME.DOOR,
+            publicSet.TYPE_FRIENDLY_NAME.WINDOW
+        ];
+        TYPE_BANNED_TO_DELETE = [
+            publicSet.TYPE_FRIENDLY_NAME.FLOOR,
+            publicSet.TYPE_FRIENDLY_NAME.WALL,
+            publicSet.TYPE_FRIENDLY_NAME.CEILING,
+            publicSet.TYPE_FRIENDLY_NAME.LIGHT_HELPER,
+            publicSet.TYPE_FRIENDLY_NAME.BACKGROUND,
+            publicSet.TYPE_FRIENDLY_NAME.DOOR,
+            publicSet.TYPE_FRIENDLY_NAME.WINDOW
+        ];
+    }());
+
+    return publicSet;
+}();    // close IIFE
+
+
+
 
 // ------------------------------------------------------------------
 //                         事件处理
@@ -408,11 +451,11 @@ var hEvent = function () {  // open IIFE
                         break;
                     case 'Z'.charCodeAt(0):
                         // Z：缩小选定的对象
-                        zoomOut();
+                        hClass.zoomOut();
                         break;
                     case 'X'.charCodeAt(0):
                         // X：放大选定的对象
-                        zoomIn();
+                        hClass.zoomIn();
                         break;
                 }
             } else {
@@ -421,7 +464,7 @@ var hEvent = function () {  // open IIFE
                 }
                 if (keyCode === 46) {
                     // Delete: 删除选定的对象
-                    deleteObjectFromScene();
+                    hClass.deleteObjectFromScene();
                 } else if (keyCode === 27) {
                     // Escape: 是否开启鼠标选定
                     toggleSelectByMouse();
@@ -452,16 +495,143 @@ var hEvent = function () {  // open IIFE
              * 放在render()函数中，调用的频率会更高，相应地会更加影响系统的性能。
              */
         },
+        // 重要提醒：在已经定义了onmousedown、onmouseup事件的情况下，应避免再定义事件onclick，否则会出现难以理解的事情！
         mouseClick: function() {
-
+            var location;
+            if (INTERSECTED) {
+                if (isSupportingFace(INTERSECTED)) {
+                    // 可选中的对象是一个支撑面，对于支撑面，可以向支撑面上添加对象或者修改支撑面的属性
+                    if (SELECT_IN_MENU) {
+                        // 如果已经在菜单中选择了一种对象，就向支撑面上添加对象
+                        // INTERSECTED是支撑面，则可以向这个支撑面上添加一个已经选定的对象
+                        addObjectInMenu(INTERSECTED);
+                    } else {
+                        // var curPlane = new THREE.Plane();
+                        // generateMathPlane(INTERSECTED, curPlane);
+                        // var intersectionPoint = new THREE.Vector3();
+                        // if (rayCaster.ray.intersectPlane(curPlane, intersectionPoint)) {
+                        //     createSurfacePlane(INTERSECTED, intersectionPoint);
+                        // }
+                        // 设置属性的过程中，实际上用到了侧边面板，因此需要先隐藏光源
+                        if (INTERSECTED.typename !== hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                            hLight.hideAllLightHelper();
+                        }
+                        // 如果没有从菜单中选择对象，则切换到选择项的设置页面
+                        SELECTED_FOR_SETTING = INTERSECTED;
+                        switch (INTERSECTED.typename) {
+                            case hClass.TYPE_FRIENDLY_NAME.FLOOR:
+                                loadModifyPlane('floor');
+                                break;
+                            case hClass.TYPE_FRIENDLY_NAME.CEILING:
+                                loadModifyPlane('ceiling');
+                                break;
+                            case hClass.TYPE_FRIENDLY_NAME.WALL:
+                                loadModifyPlane('wall');
+                                break;
+                        }
+                    }
+                } else {
+                    // 设置属性的过程中，实际上用到了侧边面板，因此需要先隐藏光源
+                    if (INTERSECTED.typename !== hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                        hLight.hideAllLightHelper();
+                    }
+                    // 可选中的对象不是支撑面，即INTERSECTED不是支撑面，则可以设置这个支撑面的相关属性
+                    SELECTED_FOR_SETTING = INTERSECTED;
+                    switch (INTERSECTED.typename) {
+                        case 'bed':
+                        case 'sofa':
+                        case 'refrigerator':
+                        case 'bookcase':
+                        case 'desk':
+                            location = 'json/pagedata/obj-modify.json';
+                            $.get(location, function (data, status) {
+                                if (status === 'success') {
+                                    showPopup('选中了家具');
+                                } else {
+                                    errout('获取JSON文件(' + location + ')失败', true);
+                                }
+                                parseSidePanelPageData(data);
+                            });
+                            selector.value = -1;
+                            break;
+                        case hClass.TYPE_FRIENDLY_NAME.BASIC:
+                            location = 'json/pagedata/basicshape-modify.json';
+                            $.get(location, function (data, status) {
+                                if (status === 'success') {
+                                    showPopup('成功获取JSON文件：' + location);
+                                } else {
+                                    errout('获取JSON文件(' + location + ')失败', true);
+                                }
+                                parseSidePanelPageData(data);
+                            });
+                            selector.value = -1;
+                            break;
+                        case hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP:
+                            // 选择的对象是光源
+                            SELECTED_FOR_SETTING = INTERSECTED.children[0];
+                            if (SELECTED_FOR_SETTING instanceof THREE.SpotLight) {
+                                // 选定的光源类型是聚光灯
+                                location = 'json/pagedata/spotlight-modify.json';
+                                $.get(location, function (data, status) {
+                                    if (status === 'success') {
+                                        showPopup('选中了聚光灯');
+                                    } else {
+                                        errout('获取JSON文件(' + location + ')失败', true);
+                                    }
+                                    parseSidePanelPageData(data);
+                                });
+                            }
+                            selector.value = -1;
+                            break;
+                        case hClass.TYPE_FRIENDLY_NAME.WINDOW:
+                            location = 'json/pagedata/window-modify.json';
+                            $.get(location, function (data, status) {
+                                if (status === 'success') {
+                                    showPopup('选中了窗户');
+                                } else {
+                                    errout('获取JSON文件(' + location + ')失败', true);
+                                }
+                                parseSidePanelPageData(data);
+                            });
+                            selector.value = -1;
+                            break;
+                        case hClass.TYPE_FRIENDLY_NAME.DOOR:
+                            location = 'json/pagedata/door-modify.json';
+                            $.get(location, function (data, status) {
+                                if (status === 'success') {
+                                    showPopup('选中了门');
+                                } else {
+                                    errout('获取JSON文件(' + location + ')失败', true);
+                                }
+                                parseSidePanelPageData(data);
+                            });
+                            selector.value = -1;
+                            break;
+                        case hClass.TYPE_FRIENDLY_NAME.SURFACE_PLANE:
+                            location = 'json/pagedata/surfaceplane-modify.json';
+                            $.get(location, function (data, status) {
+                                if (status === 'success') {
+                                    showPopup('选中了挂饰');
+                                } else {
+                                    errout('获取JSON文件(' + location + ')失败', true);
+                                }
+                                parseSidePanelPageData(data);
+                            });
+                            selector.value = -1;
+                            break;
+                        default:
+                            selector.value = -1;
+                            break;
+                    }
+                }
+            }
         },
         mouseDown: function(event) {
             event.preventDefault();
-            var i;
             // 用于移动对象
             // 由于相交的对象已经从render()->pickObject()中选择出来，我们只需要直接利用INTERSECTED。
             // 如果有鼠标可以选择的对象
-            if (INTERSECTED && canMove(INTERSECTED)) {
+            if (INTERSECTED && hClass.canMove(INTERSECTED)) {
                 // 用于选定导入的OBJ模型对象的整体，或者光源的整体
                 if (INTERSECTED.parent instanceof THREE.Group) {
                     SELECTED = INTERSECTED.parent;
@@ -488,7 +658,7 @@ var hEvent = function () {  // open IIFE
                  * optionalTarget -- Vector3    The Vector3 to store the result in, or null to create a new Vector3.
                  * Intersect this Ray with a Plane, returning the intersection point or null if there is no intersection.
                  */
-                if (raycaster.ray.intersectPlane(supportingPlane, intersection)) {
+                if (rayCaster.ray.intersectPlane(supportingPlane, intersection)) {
                     // errout('鼠标按下选定平面y=' + intersection.y);
                     // errout('SELECTED.POSITION.Y=' + SELECTED.position.y);
                     offset.copy(intersection).sub(SELECTED.position);
@@ -531,13 +701,13 @@ var hEvent = function () {  // open IIFE
             }
             hEvent.isClickTimeOut = false;
             if (isClick) {
-                mouseclick();
+                this.mouseClick();
             }
         },
         // 向上滚动
-        wheelScrollUp: function () {zoomIn();},
+        wheelScrollUp: function () {hClass.zoomIn();},
         // 向下滚动
-        wheelScrollDown: function () {zoomOut();},
+        wheelScrollDown: function () {hClass.zoomOut();},
         initialize: function () {
             // 鼠标事件的设置（除了滚轮）
             SQUARE_OF_MAX_MOVE_RADUIS = MAX_MOVE_RADUIS * MAX_MOVE_RADUIS;
@@ -592,479 +762,271 @@ hEvent.initialize();
 
 
 
-
-// 禁止移动的对象列表
-var BANNED_MOVING = [
-    'floor',
-    'ceiling',
-    'wall',
-    'lighthelper',
-    'background',
-    'door',
-    'window'
-];
-// 判断鼠标下方的对象是否可以移动
-function canMove(object3d) {
-    "use strict";
-    var i;
-    var ret = true;
-    for (i = 0; i < BANNED_MOVING.length; i++) {
-        if (object3d.typename === BANNED_MOVING[i]) {
-            ret = false;
-        }
-    }
-    return ret;
-}
-
-// 指定要更改设置的对象，对象的修改代码位于各个JSON文件中
-var SELECTED_FOR_SETTING;
-// 重要提醒：在已经定义了onmousedown、onmouseup事件的情况下，应避免再定义事件onclick，否则会出现难以理解的事情！
-// 鼠标单击事件click在这里处理
-function mouseclick() {
-    "use strict";
-    var i;
-    var location;
-    if (INTERSECTED) {
-        if (isSupportingFace(INTERSECTED)) {
-            // 可选中的对象是一个支撑面，对于支撑面，可以向支撑面上添加对象或者修改支撑面的属性
-            if (SELECT_IN_MENU) {
-                // 如果已经在菜单中选择了一种对象，就向支撑面上添加对象
-                // INTERSECTED是支撑面，则可以向这个支撑面上添加一个已经选定的对象
-                addObjectInMenu(INTERSECTED);
-            } else {
-                // var curPlane = new THREE.Plane();
-                // generateMathPlane(INTERSECTED, curPlane);
-                // var intersectionPoint = new THREE.Vector3();
-                // if (raycaster.ray.intersectPlane(curPlane, intersectionPoint)) {
-                //     createSurfacePlane(INTERSECTED, intersectionPoint);
-                // }
-                // 设置属性的过程中，实际上用到了侧边面板，因此需要先隐藏光源
-                if (INTERSECTED.typename !== 'lightgroup') {
-                    hideAllLightHelper();
-                }
-                // 如果没有从菜单中选择对象，则切换到选择项的设置页面
-                SELECTED_FOR_SETTING = INTERSECTED;
-                switch (INTERSECTED.typename) {
-                    case 'floor':
-                        loadModifyPlane('floor');
-                        break;
-                    case 'ceiling':
-                        loadModifyPlane('ceiling');
-                        break;
-                    case 'wall':
-                        loadModifyPlane('wall');
-                        break;
-                }
-            }
-        } else {
-            // 设置属性的过程中，实际上用到了侧边面板，因此需要先隐藏光源
-            if (INTERSECTED.typename !== 'lightgroup') {
-                hideAllLightHelper();
-            }
-            // 可选中的对象不是支撑面，即INTERSECTED不是支撑面，则可以设置这个支撑面的相关属性
-            SELECTED_FOR_SETTING = INTERSECTED;
-            switch (INTERSECTED.typename) {
-                case 'bed':
-                case 'sofa':
-                case 'refrigerator':
-                case 'bookcase':
-                case 'desk':
-                    location = 'json/pagedata/obj-modify.json';
-                    $.get(location, function (data, status) {
-                        if (status === 'success') {
-                            showPopup('选中了家具');
-                        } else {
-                            errout('获取JSON文件(' + location + ')失败', true);
-                        }
-                        parseSidePanelPageData(data);
-                    });
-                    selector.value = -1;
-                    break;
-                case 'basic':
-                    location = 'json/pagedata/basicshape-modify.json';
-                    $.get(location, function (data, status) {
-                        if (status === 'success') {
-                            showPopup('成功获取JSON文件：' + location);
-                        } else {
-                            errout('获取JSON文件(' + location + ')失败', true);
-                        }
-                        parseSidePanelPageData(data);
-                    });
-                    selector.value = -1;
-                    break;
-                case 'lightgroup':
-                    // 选择的对象是光源
-                    SELECTED_FOR_SETTING = INTERSECTED.children[0];
-                    if (SELECTED_FOR_SETTING instanceof THREE.SpotLight) {
-                        // 选定的光源类型是聚光灯
-                        location = 'json/pagedata/spotlight-modify.json';
-                        $.get(location, function (data, status) {
-                            if (status === 'success') {
-                                showPopup('选中了聚光灯');
-                            } else {
-                                errout('获取JSON文件(' + location + ')失败', true);
-                            }
-                            parseSidePanelPageData(data);
-                        });
-                    }
-                    selector.value = -1;
-                    break;
-                case 'window':
-                    location = 'json/pagedata/window-modify.json';
-                    $.get(location, function (data, status) {
-                        if (status === 'success') {
-                            showPopup('选中了窗户');
-                        } else {
-                            errout('获取JSON文件(' + location + ')失败', true);
-                        }
-                        parseSidePanelPageData(data);
-                    });
-                    selector.value = -1;
-                    break;
-                case 'door':
-                    location = 'json/pagedata/door-modify.json';
-                    $.get(location, function (data, status) {
-                        if (status === 'success') {
-                            showPopup('选中了门');
-                        } else {
-                            errout('获取JSON文件(' + location + ')失败', true);
-                        }
-                        parseSidePanelPageData(data);
-                    });
-                    selector.value = -1;
-                    break;
-                case 'surfaceplane':
-                    location = 'json/pagedata/surfaceplane-modify.json';
-                    $.get(location, function (data, status) {
-                        if (status === 'success') {
-                            showPopup('选中了挂饰');
-                        } else {
-                            errout('获取JSON文件(' + location + ')失败', true);
-                        }
-                        parseSidePanelPageData(data);
-                    });
-                    selector.value = -1;
-                    break;
-                default:
-                    selector.value = -1;
-                    break;
-            }
-        }
-    }
-}
-
-// 向场景中添加基本图形，仅用于测试。
-// cube定义为全局变量，因为它需要自己旋转，render()需要实时修改它的朝向。
-// var cube;
-function loadBasicShape(floor_for_basic_shape) {
-    "use strict";
-    var i, j;
-    // Three.js的图形绘制模式：首先创建一个几何网格，然后指定表面材料，最后使用Mesh构造出几何体，放到场景中。
-    // 原点处不断自己旋转的正方体，旋转代码在后面
-    // var geometry = new THREE.BoxGeometry(1, 1, 1);
-    // var material = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
-    // cube = new THREE.Mesh(geometry, material);
-    // cube.typename = 'basic';
-    // cube.supportingFace = floor_for_basic_shape;
-    // scene.add(cube);
-
-    // 沿着Z轴排列的一系列圆柱
-    // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
-    var geo_cylinder = new THREE.CylinderGeometry(0.2, 0.4, 0.5, 12, 15);
-    for (i = 0; i < 20; i++) {
-        var mat_cylinder;
-        var mat_cylinder_para = {
-            color: hTools.getRandColor(),
-            transparent: true,
-            opacity: 0.9
-        };
-        if (i % 2 === 0) {
-            mat_cylinder = new THREE.MeshLambertMaterial(mat_cylinder_para);
-        } else {
-            mat_cylinder = new THREE.MeshPhongMaterial(mat_cylinder_para);
-        }
-        var cylinder = new THREE.Mesh(geo_cylinder, mat_cylinder);
-        cylinder.position.set(0, 0, i);
-        cylinder.typename = 'basic';
-        cylinder.supportingFace = floor_for_basic_shape;
-        cylinder.castShadow = true;
-        cylinder.receiveShadow = true;
-        scene.add(cylinder);
-    }
-}
-
-
-
-
-
-
-
 // ------------------------------------------------------------------
 //                         光照部分
 // ------------------------------------------------------------------
 var hLight = function() {
+    "use strict";
 
+    // private attributes and methods
+    var ambientLightObject = null;
+    var directionalLightObject = [];
+
+    // 为了实现真实感渲染，本系统不提供点光源的支持，因为点光源不能够显示阴影。
+    var DEFAULT_SPOTLIGHT = {
+        posX: 5,
+        posY: 6,
+        posZ: 5,
+        targetPosX: 0,
+        targetPosY: -1.01,
+        targetPosZ: 0,
+        red: 0x88,
+        green: 0x88,
+        blue: 0x88,
+        intensity: 0.5,
+        distance: 0,
+        angle: Math.PI/3
+    };
+
+    var RADIUS_OF_LIGHT_SPHERE = 0.75;
+    var WIDTHSEGMENTS_OF_LIGHT_SPHERE = 64;
+    var HEIGHTSEGMENTS_OF_LIGHT_SPHERE = 64;
+    var COLOR_OF_LIGHT_SPHERE = 0xFF980A;
+
+    // public attributes and methods
+    var publicSet = {
+        ambientLightParameter: {
+            gray: 0x80,
+            intensity: 0.52
+        },
+        // updateAmbientLight()：设置环境光
+        updateAmbientLight: function () {
+            ambientLightObject.color.r = this.ambientLightParameter.gray/255;
+            ambientLightObject.color.g = this.ambientLightParameter.gray/255;
+            ambientLightObject.color.b = this.ambientLightParameter.gray/255;
+            ambientLightObject.intensity = this.ambientLightParameter.intensity;
+        },
+        // createAmbientLight()：创建环境光
+        createAmbientLight: function() {
+            var gray = this.ambientLightParameter.gray;
+            var intensity = this.ambientLightParameter.intensity;
+            var hexColor = 256 * 256 * gray + 256 * gray + gray;
+            // AmbientLight( color, intensity )
+            ambientLightObject = new THREE.AmbientLight(hexColor, intensity);
+            scene.add(ambientLightObject);
+        },
+
+        directionalLightParameter: {
+            gray: 0x80,
+            intensity: 0.8,
+            height_factor: 2.1,
+            DISTANCE: 100
+        },
+
+        // 创建方向光，方向光可以增强画面的真实感
+        createDirectionalLight: function () {
+            /* 三个方向光的方向彼此成120°角，三个光源发射点构成了一个正三角形，它们的坐标分别是(0, a), (sqrt(3)/2*a, -1/2*a),
+             * (-sqrt(3)/2*a, -1/2*a)。这个正三角形的几何中心是(0, 0)。
+             */
+            var parameters = this.directionalLightParameter;
+            var a = parameters.DISTANCE;
+            var i;
+            var light = [];
+            var lightTarget = new THREE.Object3D();
+            var targetPos = new THREE.Vector3(0, 0, 0);
+            var lightHeight = room.height * parameters.height_factor;
+            lightTarget.position.copy(targetPos);
+            for (i=0;i<3;i++) {
+                var gray = parameters.gray;
+                var hexColor = 256 * 256 * gray + 256 * gray + gray;
+                // DirectionalLight( hex, intensity )
+                light[i] = new THREE.DirectionalLight(hexColor, parameters.intensity);
+                light[i].target = lightTarget;
+                switch (i) {
+                    case 0:
+                        light[i].position.set(0, lightHeight, a);
+                        break;
+                    case 1:
+                        light[i].position.set(Math.sqrt(3)/2*a, lightHeight, -1/2*a);
+                        break;
+                    case 2:
+                        light[i].position.set(-Math.sqrt(3)/2*a, lightHeight, -1/2*a);
+                        break;
+                }
+                scene.add(light[i]);
+                directionalLightObject.push(light[i]);
+            }
+        },
+        // 更新方向光
+        updataDirectionalLight: function () {
+            var parameters = this.directionalLightParameter;
+            var a = parameters.DISTANCE;
+            var i;
+            var lightHeight = room.height * parameters.height_factor;
+            var objects = directionalLightObject;
+            for (i=0;i<objects.length;i++) {
+                objects[i].color.setRGB(objects.gray/255, objects.gray/255, objects.gray/255);
+                objects[i].intensity = objects.intensity;
+                switch (i) {
+                    case 0:
+                        objects[i].position.set(0, lightHeight, a);
+                        break;
+                    case 1:
+                        objects[i].position.set(Math.sqrt(3)/2*a, lightHeight, -1/2*a);
+                        break;
+                    case 2:
+                        objects[i].position.set(-Math.sqrt(3)/2*a, lightHeight, -1/2*a);
+                        break;
+                }
+            }
+        },
+        // 创建聚光灯
+        createSpotLight: function (position, supportingFace, directionY) {
+            if (!(position instanceof THREE.Vector3) || !(supportingFace instanceof THREE.Object3D)) {
+                errout('参数错误！', true);
+                return;
+            }
+            // 聚光灯的方向，默认是向下的
+            var targetPosY = DEFAULT_SPOTLIGHT.targetPosY;
+            switch (typeof directionY) {
+                case 'number':
+                    targetPosY = (directionY > 0) ? 1.01 : -1.01;
+                    break;
+                case 'boolean':
+                    targetPosY = (directionY === true) ? 1.01 : -1.01;
+                    break;
+            }
+            var spotLight = new THREE.SpotLight(0, DEFAULT_SPOTLIGHT.intensity, DEFAULT_SPOTLIGHT.distance, DEFAULT_SPOTLIGHT.angle);
+            spotLight.castShadow = true;
+            spotLight.color.setHex(256 * 256 * DEFAULT_SPOTLIGHT.red + 256 * DEFAULT_SPOTLIGHT.green + DEFAULT_SPOTLIGHT.blue);
+            var lightTarget = new THREE.Object3D();
+            var targetPos = new THREE.Vector3(DEFAULT_SPOTLIGHT.targetPosX, targetPosY, DEFAULT_SPOTLIGHT.targetPosZ);
+            lightTarget.position.copy(targetPos);
+            spotLight.target = lightTarget;
+            spotLight.targetPosition = new THREE.Vector3();
+            spotLight.targetPosition.copy(targetPos);
+            // var spotLightHelper = new THREE.SpotLightHelper(spotLight);
+            var spotLightHelper = null;
+            var lightGroup = this.createLightGroup(spotLight, spotLightHelper, lightTarget, supportingFace);
+            scene.add(lightGroup);
+            // 移动光源组的位置
+            var lightPos = new THREE.Vector3(position.x, position.y, position.z);
+            this.moveLightGroup(lightGroup, lightPos);
+        },
+        // updateSpotLight()：更新聚光灯的相关设置
+        updateSpotLight: function () {
+            if (SELECTED_FOR_SETTING instanceof THREE.SpotLight && SELECTED_FOR_SETTING.parent instanceof THREE.Group) {
+                SELECTED_FOR_SETTING.target.position.copy(SELECTED_FOR_SETTING.targetPosition);
+            }
+        },
+        // createLightGroup()：创建光源组，包含光源本身、光源的辅助操作球、光源的辅助操作控件（如果有）、光照目标（如果有），附加参数是支撑平面
+        createLightGroup: function (lightObject, lightObjectHelper, lightTarget, supportingFace) {
+            if (lightObject === undefined) {
+                errout('参数错误！', true);
+                return;
+            }
+            var lightGroup = new THREE.Group();
+            lightGroup.typename = hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP;
+            lightGroup.helperVisible = false;
+            lightGroup.supportingFace = supportingFace;
+            // 添加光源本身
+            // lightGroup.children[0] = lightObject;
+            lightGroup.add(lightObject);
+            // 添加用于辅助操作的光源球体
+            var sphereGeo = new THREE.SphereGeometry(RADIUS_OF_LIGHT_SPHERE, WIDTHSEGMENTS_OF_LIGHT_SPHERE, HEIGHTSEGMENTS_OF_LIGHT_SPHERE);
+            var sphereMat = new THREE.MeshStandardMaterial({color: COLOR_OF_LIGHT_SPHERE});
+            var sphere = new THREE.Mesh(sphereGeo, sphereMat);
+            // sphere.position.copy(lightObject.position);
+            sphere.castShadow = false;
+            sphere.receiveShadow = false;
+            sphere.visible = true;
+            sphere.typename = hClass.TYPE_FRIENDLY_NAME.LIGHT_SPHERE;
+            sphere.supportingFace = supportingFace;
+            // lightGroup.children[1] = sphere;
+            lightGroup.add(sphere);
+            // 添加光源辅助操作控件
+            if (lightObjectHelper) {
+                lightObjectHelper.typename = hClass.TYPE_FRIENDLY_NAME.LIGHT_HELPER;
+            } else {
+                lightObjectHelper = new THREE.Object3D();
+            }
+            // lightGroup.children[2] = lightObjectHelper;
+            lightGroup.add(lightObjectHelper);
+            // 添加光源目标
+            if (lightTarget) {
+                lightTarget.typename = hClass.TYPE_FRIENDLY_NAME.LIGHT_TARGET;
+                // lightGroup.children[3] = lightTarget;
+                lightGroup.add(lightTarget);
+                lightGroup.children[0].target = lightGroup.children[3];
+            } else {
+                lightTarget = new THREE.Object3D();
+                // lightGroup.children[3] = lightTarget;
+                lightGroup.add(lightTarget);
+            }
+            return lightGroup;
+        },
+        // moveLightGroup()：移动光源组
+        // newPosition - THREE的Vector3类型
+        moveLightGroup: function(lightGroup, newPosition, newTargetPosition) {
+            if (lightGroup === undefined || !(newPosition instanceof THREE.Vector3)) {
+                errout('参数错误！', true);
+                return;
+            }
+            lightGroup.position.copy(newPosition);
+            if (newTargetPosition) {
+                if (!(newTargetPosition instanceof THREE.Vector3)) {
+                    errout('参数错误！', true);
+                    return;
+                }
+                lightGroup.children[3].position.copy(newTargetPosition);
+            }
+            lightGroup.updateMatrixWorld();
+        },
+        // toggleLightHelper()：切换光源辅助控件的显示状态
+        toggleLightHelper: function (lightGroup, setMode) {
+            if (lightGroup.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                if (typeof setMode !== 'boolean') {
+                    setMode = !lightGroup.helperVisible;
+                }
+                if (lightGroup.children[1] !== undefined) {
+                    lightGroup.children[1].visible = setMode;
+                }
+                if (lightGroup.children[2] !== undefined) {
+                    lightGroup.children[2].visible = setMode;
+                }
+            }
+        },
+        // 显示全部的光源辅助控件
+        showAllLightHelper: function () {
+            var i;
+            for (i=0;i<scene.children.length;i++) {
+                if (scene.children[i].typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                    this.toggleLightHelper(scene.children[i], true);
+                }
+            }
+        },
+
+        // 隐藏全部的光源辅助控件
+        hideAllLightHelper:function () {
+            var i;
+            for (i=0;i<scene.children.length;i++) {
+                if (scene.children[i].typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
+                    this.toggleLightHelper(scene.children[i], false);
+                }
+            }
+        }
+    };
+
+    return publicSet;
 }();
-var AMBIENTLIGHT;
-// 环境光的颜色
-var ambientLightParameter = {
-    gray: 0x80,
-    intensity: 0.52
-};
-// 创建环境光
-function createAmbientLight() {
-    "use strict";
-    var i;
-    var hexColor = 256 * 256 * ambientLightParameter.gray + 256 * ambientLightParameter.gray + ambientLightParameter.gray;
-    // AmbientLight( color, intensity )
-    var ambientLight = new THREE.AmbientLight(hexColor, ambientLightParameter.intensity);
-    scene.add(ambientLight);
-    AMBIENTLIGHT = ambientLight;
-}
-// 设置环境光
-function updateAmbientLight() {
-    "use strict";
-    AMBIENTLIGHT.color.r = ambientLightParameter.gray/255;
-    AMBIENTLIGHT.color.g = ambientLightParameter.gray/255;
-    AMBIENTLIGHT.color.b = ambientLightParameter.gray/255;
-    AMBIENTLIGHT.intensity = ambientLightParameter.intensity;
-}
 
 // TODO: 增加阴影特效
 
-var DIRECTIONALLIGHT = [];
-var directionalLightParameter = {
-    gray: 0x80,
-    intensity: 0.8,
-    height_factor: 2.1,
-    DISTANCE: 100
-};
-// 创建方向光，方向光可以增强画面的真实感
-function createDirectionalLight() {
-    "use strict";
-    /* 三个方向光的方向彼此成120°角，三个光源发射点构成了一个正三角形，它们的坐标分别是(0, a), (sqrt(3)/2*a, -1/2*a),
-     * (-sqrt(3)/2*a, -1/2*a)。这个正三角形的几何中心是(0, 0)。
-     */
-    var a = directionalLightParameter.DISTANCE;
-    var i;
-    var light = [];
-    var lightTarget = new THREE.Object3D();
-    var targetPos = new THREE.Vector3(0, 0, 0);
-    var lightheight = room.height * directionalLightParameter.height_factor;
-    lightTarget.position.copy(targetPos);
-    for (i=0;i<3;i++) {
-        var hexColor = 256 * 256 * ambientLightParameter.gray + 256 * ambientLightParameter.gray + ambientLightParameter.gray;
-        // DirectionalLight( hex, intensity ) —— 方向光
-        light[i] = new THREE.DirectionalLight(hexColor, directionalLightParameter.intensity);
-        light[i].target = lightTarget;
-        switch (i) {
-            case 0:
-                light[i].position.set(0, lightheight, a);
-                break;
-            case 1:
-                light[i].position.set(Math.sqrt(3)/2*a, lightheight, -1/2*a);
-                break;
-            case 2:
-                light[i].position.set(-Math.sqrt(3)/2*a, lightheight, -1/2*a);
-                break;
-        }
-        scene.add(light[i]);
-        DIRECTIONALLIGHT[i] = light[i];
-    }
-}
-// 更新方向光
-function updataDirectionalLight() {
-    "use strict";
-    var a = directionalLightParameter.DISTANCE;
-    var i;
-    var lightheight = room.height * directionalLightParameter.height_factor;
-    for (i=0;i<DIRECTIONALLIGHT.length;i++) {
-        DIRECTIONALLIGHT[i].color.r = directionalLightParameter.gray/255;
-        DIRECTIONALLIGHT[i].color.g = directionalLightParameter.gray/255;
-        DIRECTIONALLIGHT[i].color.b = directionalLightParameter.gray/255;
-        DIRECTIONALLIGHT[i].intensity = directionalLightParameter.intensity;
-        switch (i) {
-            case 0:
-                DIRECTIONALLIGHT[i].position.set(0, lightheight, a);
-                break;
-            case 1:
-                DIRECTIONALLIGHT[i].position.set(Math.sqrt(3)/2*a, lightheight, -1/2*a);
-                break;
-            case 2:
-                DIRECTIONALLIGHT[i].position.set(-Math.sqrt(3)/2*a, lightheight, -1/2*a);
-                break;
-        }
-    }
-}
 
-// 为了实现真实感渲染，本系统不提供点光源的支持，因为点光源不能够显示阴影。
-var DEFAULT_SPOTLIGHT = {
-    posX: 5,
-    posY: 6,
-    posZ: 5,
-    targetPosX: 0,
-    targetPosY: -1.01,
-    targetPosZ: 0,
-    red: 0x88,
-    green: 0x88,
-    blue: 0x88,
-    intensity: 0.5,
-    distance: 0,
-    angle: Math.PI/3
-};
-// 创建聚光灯
-function createSpotLight(position, supportingFace, directionY) {
-    "use strict";
-    var i;
-    if (!(position instanceof THREE.Vector3) || !(supportingFace instanceof THREE.Object3D)) {
-        errout('参数错误！', true);
-        return;
-    }
-    // 聚光灯的方向，默认是向下的
-    var targetPosY = DEFAULT_SPOTLIGHT.targetPosY;
-    switch (typeof directionY) {
-        case 'number':
-            targetPosY = (directionY > 0) ? 1.01 : -1.01;
-            break;
-        case 'boolean':
-            targetPosY = (directionY === true) ? 1.01 : -1.01;
-            break;
-    }
-    var spotLight = new THREE.SpotLight(0, DEFAULT_SPOTLIGHT.intensity, DEFAULT_SPOTLIGHT.distance, DEFAULT_SPOTLIGHT.angle);
-    spotLight.castShadow = true;
-    spotLight.color.setHex(256 * 256 * DEFAULT_SPOTLIGHT.red + 256 * DEFAULT_SPOTLIGHT.green + DEFAULT_SPOTLIGHT.blue);
-    var lightTarget = new THREE.Object3D();
-    var targetPos = new THREE.Vector3(DEFAULT_SPOTLIGHT.targetPosX, targetPosY, DEFAULT_SPOTLIGHT.targetPosZ);
-    lightTarget.position.copy(targetPos);
-    spotLight.target = lightTarget;
-    spotLight.targetPosition = new THREE.Vector3();
-    spotLight.targetPosition.copy(targetPos);
-    // var spotLightHelper = new THREE.SpotLightHelper(spotLight);
-    var spotLightHelper = null;
-    var lightGroup = createLightGroup(spotLight, spotLightHelper, lightTarget, supportingFace);
-    scene.add(lightGroup);
-    // 移动光源组的位置
-    var lightPos = new THREE.Vector3(position.x, position.y, position.z);
-    moveLightGroup(lightGroup, lightPos);
-}
-// 更新聚光灯的相关设置
-function updateSpotLight() {
-    "use strict";
-    if (SELECTED_FOR_SETTING instanceof THREE.SpotLight && SELECTED_FOR_SETTING.parent instanceof THREE.Group) {
-        SELECTED_FOR_SETTING.target.position.copy(SELECTED_FOR_SETTING.targetPosition);
-    }
-}
 
-var RADIUS_OF_LIGHT_SPHERE = 0.75;
-var WIDTHSEGMENTS_OF_LIGHT_SPHERE = 64;
-var HEIGHTSEGMENTS_OF_LIGHT_SPHERE = 64;
-var COLOR_OF_LIGHT_SPHERE = 0xFF980A;
-// 创建光源组，包含光源本身、光源的辅助操作球、光源的辅助操作控件（如果有）、光照目标（如果有），附加参数是支撑平面
-function createLightGroup(lightObject, lightObjectHelper, lightTarget, supportingFace) {
-    "use strict";
-    if (lightObject === undefined) {
-        errout('参数错误！', true);
-        return;
-    }
-    var lightGroup = new THREE.Group();
-    lightGroup.typename = 'lightgroup';
-    lightGroup.helperVisible = false;
-    lightGroup.supportingFace = supportingFace;
-    // 添加光源本身
-    // lightGroup.children[0] = lightObject;
-    lightGroup.add(lightObject);
-    // 添加用于辅助操作的光源球体
-    var sphereGeo = new THREE.SphereGeometry(RADIUS_OF_LIGHT_SPHERE, WIDTHSEGMENTS_OF_LIGHT_SPHERE, HEIGHTSEGMENTS_OF_LIGHT_SPHERE);
-    var sphereMat = new THREE.MeshStandardMaterial({color: COLOR_OF_LIGHT_SPHERE});
-    var sphere = new THREE.Mesh(sphereGeo, sphereMat);
-    // sphere.position.copy(lightObject.position);
-    sphere.castShadow = false;
-    sphere.receiveShadow = false;
-    sphere.visible = true;
-    sphere.typename = 'lightsphere';
-    sphere.supportingFace = supportingFace;
-    // lightGroup.children[1] = sphere;
-    lightGroup.add(sphere);
-    // 添加光源辅助操作控件
-    if (lightObjectHelper) {
-        lightObjectHelper.typename = 'lighthelper';
-    } else {
-        lightObjectHelper = new THREE.Object3D();
-    }
-    // lightGroup.children[2] = lightObjectHelper;
-    lightGroup.add(lightObjectHelper);
-    // 添加光源目标
-    if (lightTarget) {
-        lightTarget.typename = 'lighttarget';
-        // lightGroup.children[3] = lightTarget;
-        lightGroup.add(lightTarget);
-        lightGroup.children[0].target = lightGroup.children[3];
-    } else {
-        lightTarget = new THREE.Object3D();
-        // lightGroup.children[3] = lightTarget;
-        lightGroup.add(lightTarget);
-    }
-    return lightGroup;
-}
 
-// 移动光源组
-// newPosition - THREE的Vector3类型
-function moveLightGroup(lightGroup, newPosition, newTargetPosition) {
-    "use strict";
-    // errout('最终y=' + newPosition.y);
-    var i;
-    if (lightGroup === undefined || !(newPosition instanceof THREE.Vector3)) {
-        errout('参数错误！', true);
-        return;
-    }
-    lightGroup.position.copy(newPosition);
-    if (newTargetPosition) {
-        if (!(newTargetPosition instanceof THREE.Vector3)) {
-            errout('参数错误！', true);
-            return;
-        }
-        lightGroup.children[3].position.copy(newTargetPosition);
-    }
-    lightGroup.updateMatrixWorld();
-}
 
-// 切换光源辅助控件的显示状态
-function toggleLightHelper(lightGroup, setMode) {
-    "use strict";
-    if (lightGroup.typename === 'lightgroup') {
-        if (typeof setMode !== 'boolean') {
-            setMode = !lightGroup.helperVisible;
-        }
-        if (lightGroup.children[1] !== undefined) {
-            lightGroup.children[1].visible = setMode;
-        }
-        if (lightGroup.children[2] !== undefined) {
-            lightGroup.children[2].visible = setMode;
-        }
-    }
-}
 
-// 显示全部的光源辅助控件
-function showAllLightHelper() {
-    "use strict";
-    var i;
-    for (i=0;i<scene.children.length;i++) {
-        if (scene.children[i].typename === 'lightgroup') {
-            toggleLightHelper(scene.children[i], true);
-        }
-    }
-}
-
-// 隐藏全部的光源辅助控件
-function hideAllLightHelper() {
-    "use strict";
-    var i;
-    for (i=0;i<scene.children.length;i++) {
-        if (scene.children[i].typename === 'lightgroup') {
-            toggleLightHelper(scene.children[i], false);
-        }
-    }
-}
 
 // 存储户型的墙体数据，是THREE.Vector2的数组
 var apartmentWall = [];
@@ -1133,7 +1095,7 @@ function loadApartment() {
         centerPos.x = middle.x;
         centerPos.y = room.doorTop / 2;
         centerPos.z = middle.y;
-        createSurfacePlane(scene.children[index], centerPos, true, doorLength, room.doorTop, 'door');
+        createSurfacePlane(scene.children[index], centerPos, true, doorLength, room.doorTop, hClass.TYPE_FRIENDLY_NAME.DOOR);
     }
     var windowLength = 0;
     // 绘制窗户
@@ -1158,7 +1120,8 @@ function loadApartment() {
         centerPos.x = middle.x;
         centerPos.y = (room.windowBottom + room.windowTop) / 2;
         centerPos.z = middle.y;
-        createSurfacePlane(scene.children[index], centerPos, true, windowLength, (room.windowTop - room.windowBottom), 'window');
+        createSurfacePlane(scene.children[index], centerPos, true, windowLength, (room.windowTop - room.windowBottom),
+            hClass.TYPE_FRIENDLY_NAME.WINDOW);
     }
     var initPos = new THREE.Vector2();
     // 设置相机的初始位置
@@ -1180,7 +1143,7 @@ function findWall(point) {
         return ;
     }
     for (i=0;i<scene.children.length;i++) {
-        if (scene.children[i].typename === 'wall') {
+        if (scene.children[i].typename === hClass.TYPE_FRIENDLY_NAME.WALL) {
             var left = scene.children[i].leftPoint;
             var right = scene.children[i].rightPoint;
             if (left.x === right.x) {
@@ -1446,13 +1409,13 @@ var hCamera = function () { // open IIFE
             // 控制俯视图的情况下不显示天花板，更好的实现方式可能是使用遍历函数traverse()对scene的所有孩子进行遍历
             if (curType === TYPE.LOOKING_DOWN) {
                 for (i = 0; i < scene.children.length; i++) {
-                    if (scene.children[i].typename === 'ceiling') {
+                    if (scene.children[i].typename === hClass.TYPE_FRIENDLY_NAME.CEILING) {
                         scene.children[i].visible = false;
                     }
                 }
             } else {
                 for (i = 0; i < scene.children.length; i++) {
-                    if (scene.children[i].typename === 'ceiling') {
+                    if (scene.children[i].typename === hClass.TYPE_FRIENDLY_NAME.CEILING) {
                         scene.children[i].visible = true;
                     }
                 }
@@ -1474,7 +1437,6 @@ hCamera.initialize();
 // -------------------------------------------------------------------------
 //                         WebGL渲染器部分
 // -------------------------------------------------------------------------
-var render;
 var hRender = function(){    // open IIFE
     "use strict";
 
@@ -1580,10 +1542,10 @@ var hRender = function(){    // open IIFE
             // Lights.update();
 
             // 创建方向光和环境光
-            createDirectionalLight();
-            createAmbientLight();
+            hLight.createDirectionalLight();
+            hLight.createAmbientLight();
             // 不显示所有的灯光助手
-            hideAllLightHelper();
+            hLight.hideAllLightHelper();
 
             // 绘制很大的天花板和地板
             loadFloorAndCeiling([0, 0], FLOOR_VERTICES, {floorFill: 'images/materials/gray50.jpg'});
@@ -1598,7 +1560,7 @@ var hRender = function(){    // open IIFE
 
             if (USING_DEBUGGING_SCENE) {
                 // 绘制一系列用于参考的图形
-                loadBasicShape();
+                this.loadBasicShape();
 
                 // 显示一个坐标轴，红色X，绿色Y，蓝色Z
                 var axisHelper = new THREE.AxisHelper(1000);
@@ -1629,7 +1591,7 @@ var hRender = function(){    // open IIFE
             }
 
             // 射线，用于拾取(pick)对象
-            raycaster = new THREE.Raycaster();
+            rayCaster = new THREE.Raycaster();
 
             // 启用帧速率显示
             // hTools.FPS();
@@ -1658,6 +1620,41 @@ var hRender = function(){    // open IIFE
         },
         animate: function() {
             // cameraEllipseAnimate.animate(Camera.camera);
+        },
+        // 向场景中添加基本图形，仅用于测试。
+        loadBasicShape: function(/*floor_for_basic_shape*/) {
+            var i;
+            // Three.js的图形绘制模式：首先创建一个几何网格，然后指定表面材料，最后使用Mesh构造出几何体，放到场景中。
+            var geometry = new THREE.BoxGeometry(1, 1, 1);
+            var material = new THREE.MeshLambertMaterial({color: 0x00ff00, wireframe: true});
+            var cube = new THREE.Mesh(geometry, material);
+            cube.typename = hClass.TYPE_FRIENDLY_NAME.BASIC;
+            // cube.supportingFace = floor_for_basic_shape;
+            scene.add(cube);
+
+            // 沿着Z轴排列的一系列圆柱
+            // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
+            var geo_cylinder = new THREE.CylinderGeometry(0.2, 0.4, 0.5, 12, 15);
+            for (i = 0; i < 20; i++) {
+                var mat_cylinder;
+                var mat_cylinder_para = {
+                    color: hTools.getRandColor(),
+                    transparent: true,
+                    opacity: 0.9
+                };
+                if (i % 2 === 0) {
+                    mat_cylinder = new THREE.MeshLambertMaterial(mat_cylinder_para);
+                } else {
+                    mat_cylinder = new THREE.MeshPhongMaterial(mat_cylinder_para);
+                }
+                var cylinder = new THREE.Mesh(geo_cylinder, mat_cylinder);
+                cylinder.position.set(0, 0, i);
+                cylinder.typename = hClass.TYPE_FRIENDLY_NAME.BASIC;
+                // cylinder.supportingFace = floor_for_basic_shape;
+                cylinder.castShadow = true;
+                cylinder.receiveShadow = true;
+                scene.add(cylinder);
+            }
         }
     };
 
@@ -1671,7 +1668,7 @@ hRender.globalInitialize();
 
 // 初始化的图形绘制
 var scene = new THREE.Scene();
-var raycaster;
+var rayCaster;
 var canv = document.getElementById('canvas');
 
 
@@ -1706,7 +1703,7 @@ function pickObject() {
         return;
     }
     // 从光标坐标出发，从相机视角（图像渲染的最后阶段）建立一条射线。
-    raycaster.setFromCamera(hEvent.mousePosition, camera);
+    rayCaster.setFromCamera(hEvent.mousePosition, camera);
     // 用于移动物体
     // 如果已经处于拖动物件的状态，只需改变物体的位置position
     if (SELECTED) {
@@ -1723,12 +1720,12 @@ function pickObject() {
             generateMathPlane(SELECTED.supportingFace, supportingPlane);
         }
         // 已经得到了一个数学意义上的支撑平面supportingPlane，求交点intersection
-        if (raycaster.ray.intersectPlane(supportingPlane, intersection)) {
+        if (rayCaster.ray.intersectPlane(supportingPlane, intersection)) {
             // errout('交点y=' + intersection.y);
             // 判断移动的物体是不是光源的辅助操作球
-            if (SELECTED.typename === 'lightgroup') {
+            if (SELECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
                 errout('尝试移动操作');
-                moveLightGroup(SELECTED, intersection.sub(offset));
+                hLight.moveLightGroup(SELECTED, intersection.sub(offset));
             } else {
                 SELECTED.position.copy(intersection.sub(offset));
             }
@@ -1745,7 +1742,7 @@ function pickObject() {
      * 注意，Three.Scene，Three.Group和Three.Mesh都继承自Three.Object3D。
      */
     // http://stackoverflow.com/questions/25667394/three-js-mouse-picking-object
-    var intersects = raycaster.intersectObjects(scene.children, true);
+    var intersects = rayCaster.intersectObjects(scene.children, true);
     // 如果选取到的相交对象的数组不空，用firstPickedObject存放实际选取到的
     var firstPickedObject;
     if (intersects.length > 0) {
@@ -1771,7 +1768,7 @@ function pickObject() {
                 continue;
             } else if (intersects[i].object instanceof THREE.LineSegments) {
                 continue;
-            } else if (intersects[i].object.typename === 'background'){
+            } else if (intersects[i].object.typename === hClass.TYPE_FRIENDLY_NAME.BACKGROUND){
                 continue;
             } else {
                 firstPickedObject = intersects[i].object;
@@ -1791,7 +1788,7 @@ function pickObject() {
                 // 用于选定导入的OBJ模型对象或者光源对象的整体
                 if (INTERSECTED instanceof THREE.Group) {
                     // 使用THREE.Group的情况目前有两种：要么是导入的OBJ模型，要么是光源
-                    if (INTERSECTED.typename === 'lightgroup') {
+                    if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
                         child = INTERSECTED.children[1];
                         if (child.material.emissive) {
                             child.material.emissive.setHex(INTERSECTED.currentHex);
@@ -1817,7 +1814,7 @@ function pickObject() {
                 if (INTERSECTED.parent instanceof THREE.Group) {
                     INTERSECTED = INTERSECTED.parent;
                     // 使用THREE.Group的情况目前有两种：要么是导入的OBJ模型，要么是光源
-                    if (INTERSECTED.typename === 'lightgroup') {
+                    if (INTERSECTED.typename === hClass.TYPE_FRIENDLY_NAME.LIGHT_GROUP) {
                         child = INTERSECTED.children[1];
                         if (child.material.emissive) {
                             child.currentHex = child.material.emissive.getHex();
@@ -1867,8 +1864,6 @@ var MOUSE_ON_RIGHT_PANEL = false;
 // 如果鼠标移动到了右侧面板，取消当前已有的任何选择
 document.getElementById('right_panel').onmousemove = function (event){
     "use strict";
-    // mouse.x = null;
-    // mouse.y = undefined;
     MOUSE_ON_RIGHT_PANEL = true;
     deleteSelecting();
 };
@@ -1980,13 +1975,13 @@ function initSidePanel() {
         selector.appendChild(option);
     }
     selector.onchange = function () {
-        hideAllLightHelper();
+        hLight.hideAllLightHelper();
         switch (menulist[this.selectedIndex].id) {
             case 'addobj':
                 loadSidePanel(menulist[0].url[0]);
                 break;
             case 'addlight':
-                showAllLightHelper();
+                hLight.showAllLightHelper();
                 loadSidePanel(menulist[1].url[0]);
                 break;
             case 'camera':
@@ -1996,7 +1991,7 @@ function initSidePanel() {
                 loadSidePanel(menulist[3].url[0]);
                 break;
             case 'light':
-                showAllLightHelper();
+                hLight.showAllLightHelper();
                 loadSidePanel(menulist[4].url[0]);
                 break;
         }
@@ -2314,42 +2309,7 @@ function loadObject(path, filename, typename, location, supportingFace) {
     }
 }
 
-// 不应该被删除的对象列表
-var BANNED_DELETING = [
-    'floor',
-    'wall',
-    'ceiling',
-    'lighthelper',
-    'background',
-    'door',
-    'window'
-];
-// 判断鼠标下方的对象是否可以删除
-function canDelete(object3d) {
-    "use strict";
-    var i;
-    var ret = true;
-    for (i = 0; i < BANNED_DELETING.length; i++) {
-        if (object3d.typename === BANNED_DELETING[i]) {
-            ret = false;
-            break;
-        }
-    }
-    return ret;
-}
-// 从场景中删除对象
-function deleteObjectFromScene() {
-    "use strict";
-    var i;
-    if (INTERSECTED) {
-        if (canDelete(INTERSECTED)) {
-            if (INTERSECTED.typename==='lightsphere') {
-                INTERSECTED = INTERSECTED.parent;
-            }
-            scene.remove(INTERSECTED);
-        }
-    }
-}
+
 
 var DEFAULT_SURFACEPLANE_SIZE = {
     width: 5,
@@ -2379,9 +2339,9 @@ function addObjectInMenu(supportingFace) {
      */
     var curPlane = new THREE.Plane();
     generateMathPlane(supportingFace, curPlane);
-    if (raycaster && raycaster.ray) {
+    if (rayCaster && rayCaster.ray) {
         var intersectionPoint = new THREE.Vector3();
-        if (raycaster.ray.intersectPlane(curPlane, intersectionPoint)) {
+        if (rayCaster.ray.intersectPlane(curPlane, intersectionPoint)) {
             // var planeNormal = new THREE.Vector3();
             // planeNormal.copy(curPlane.normal);
             // planeNormal.x = Math.floor(planeNormal.x * 10) / 10;
@@ -2404,13 +2364,13 @@ function addObjectInMenu(supportingFace) {
             // 开始添加对象
             switch (SELECT_IN_MENU.typename) {
                 case 'spotlight-upward':
-                    createSpotLight(intersectionPoint, supportingFace, 1);
+                    hLight.createSpotLight(intersectionPoint, supportingFace, 1);
                     break;
                 case 'spotlight-downward':
-                    createSpotLight(intersectionPoint, supportingFace, -1);
+                    hLight.createSpotLight(intersectionPoint, supportingFace, -1);
                     break;
-                case 'surfaceplane':
-                    createSurfacePlane(supportingFace, intersectionPoint, false, DEFAULT_SURFACEPLANE_SIZE.width, DEFAULT_SURFACEPLANE_SIZE.height, 'surfaceplane', SELECT_IN_MENU.imageURL);
+                case hClass.TYPE_FRIENDLY_NAME.SURFACE_PLANE:
+                    createSurfacePlane(supportingFace, intersectionPoint, false, DEFAULT_SURFACEPLANE_SIZE.width, DEFAULT_SURFACEPLANE_SIZE.height, hClass.TYPE_FRIENDLY_NAME.SURFACE_PLANE, SELECT_IN_MENU.imageURL);
                     break;
                 default:
                     loadObject(SELECT_IN_MENU.path, SELECT_IN_MENU.filename, SELECT_IN_MENU.typename, intersectionPoint, supportingFace);
@@ -2436,7 +2396,8 @@ function isSupportingFace(object3d) {
         // 判断是不是Mesh对象
         if (object3d instanceof THREE.Mesh) {
             // 判断是否是支撑面的合法类型，有地面、墙面和天花板三种
-            if (object3d.typename === 'floor' || object3d.typename === 'wall' || object3d.typename === 'ceiling') {
+            if (object3d.typename === hClass.TYPE_FRIENDLY_NAME.FLOOR || object3d.typename ===
+                hClass.TYPE_FRIENDLY_NAME.WALL || object3d.typename === hClass.TYPE_FRIENDLY_NAME.CEILING) {
                 ret = true;
             }
         }
@@ -2558,8 +2519,8 @@ function loadFloorAndCeiling(centerPos, verticesList, options, drawCeiling) {
     // 构建Mesh，并标记
     var floorMesh = new THREE.Mesh(geometry, floorMaterial);
     var ceilingMesh = new THREE.Mesh(geometry, ceilingMaterial);
-    floorMesh.typename = 'floor';
-    ceilingMesh.typename = 'ceiling';
+    floorMesh.typename = hClass.TYPE_FRIENDLY_NAME.FLOOR;
+    ceilingMesh.typename = hClass.TYPE_FRIENDLY_NAME.CEILING;
     // 设置地板的位置和方向
     var pos = new THREE.Vector3(centerPos[0], 0, centerPos[1]);
     floorMesh.position.copy(pos);
@@ -2653,13 +2614,13 @@ function loadModifyPlane(typename) {
     $.get(location, function (data, status) {
         if (status === 'success') {
             switch(typename) {
-                case 'floor':
+                case hClass.TYPE_FRIENDLY_NAME.FLOOR:
                     showPopup('选中了地板');
                     break;
-                case 'ceiling':
+                case hClass.TYPE_FRIENDLY_NAME.CEILING:
                     showPopup('选中了天花板');
                     break;
-                case 'wall':
+                case hClass.TYPE_FRIENDLY_NAME.WALL:
                     showPopup('选中了墙壁');
                     break;
             }
@@ -2725,7 +2686,7 @@ function drawSingleWall(leftWallVertex, rightWallVertex, leftDistance, rightDist
     var mat_wall = new THREE.MeshPhongMaterial({color: DEFAULT_WALL_COLOR, map: texture_wall, side: THREE.DoubleSide});
     var shapeGeo_wall = new THREE.ShapeGeometry(shape_wall);
     var wall = new THREE.Mesh(shapeGeo_wall, mat_wall);
-    wall.typename = 'wall';
+    wall.typename = hClass.TYPE_FRIENDLY_NAME.WALL;
     wall.receiveShadow = true;
     wall.leftPoint = leftPoint;
     wall.rightPoint = rightPoint;
@@ -2734,7 +2695,7 @@ function drawSingleWall(leftWallVertex, rightWallVertex, leftDistance, rightDist
     wall.normalvector = new THREE.Vector3(Math.cos(alpha), 0, Math.sin(alpha));
     // 查找一个地板来作为支撑面
     for (i = 0; i < scene.children.length; i++) {
-        if (scene.children[i].typename === 'floor') {
+        if (scene.children[i].typename === hClass.TYPE_FRIENDLY_NAME.FLOOR) {
             wall.supportingFace = scene.children[i];
             break;
         }
@@ -2793,10 +2754,10 @@ function createSurfacePlane(supportingFace, intersectedPoint, isHole, width, hei
         imgloc = image;
     } else {
         switch (typename) {
-            case 'door':
+            case hClass.TYPE_FRIENDLY_NAME.DOOR:
                 imgloc = DEFAULT_DOOR_IMAGE;
                 break;
-            case 'window':
+            case hClass.TYPE_FRIENDLY_NAME.WINDOW:
                 imgloc = DEFAULT_WINDOW_IMAGE;
                 break;
             default:
@@ -2812,7 +2773,7 @@ function createSurfacePlane(supportingFace, intersectedPoint, isHole, width, hei
     var mat_sp = new THREE.MeshPhongMaterial( {color: DEFAULT_SURFACE_PLANE.color, map: texture_sp} );
     var sp = new THREE.Mesh( geo_sp, mat_sp );
     if (typename === null || typename === undefined) {
-        sp.typename = 'surfaceplane';
+        sp.typename = hClass.TYPE_FRIENDLY_NAME.SURFACE_PLANE;
     } else {
         sp.typename = typename;
     }
@@ -2822,15 +2783,15 @@ function createSurfacePlane(supportingFace, intersectedPoint, isHole, width, hei
     var normalvector = new THREE.Vector3();
     // 支撑面的类型可能有地面、墙壁和天花板三种
     switch (supportingFace.typename) {
-        case 'floor':
+        case hClass.TYPE_FRIENDLY_NAME.FLOOR:
             sp.rotateX(Math.PI / 2);
             break;
-        case 'wall':
+        case hClass.TYPE_FRIENDLY_NAME.WALL:
             normalvector = supportingFace.normalvector;
             var alpha_radian = Math.atan(normalvector.x / normalvector.z);
             sp.rotateY(alpha_radian);
             break;
-        case 'ceiling':
+        case hClass.TYPE_FRIENDLY_NAME.CEILING:
             sp.rotateX(Math.PI / 2);
             break;
     }
@@ -2873,15 +2834,15 @@ function createSurfacePlane(supportingFace, intersectedPoint, isHole, width, hei
 }
 function updateSurfacePlaneByTexture() {
     "use strict";
-    var texture = new THREE.TextureLoader().load( SELECTED_FOR_SETTING.imageURL );
-    SELECTED_FOR_SETTING.material.map = texture;
+    SELECTED_FOR_SETTING.material.map = new THREE.TextureLoader().load( SELECTED_FOR_SETTING.imageURL );
     SELECTED_FOR_SETTING.updateMorphTargets();
     SELECTED_FOR_SETTING.updateMatrixWorld();
 }
 // 按照新的参数，重新创建一个表面平面
 function resetSurfacePlane() {
     "use strict";
-    if (SELECTED_FOR_SETTING.typename !== 'surfaceplane' && SELECTED_FOR_SETTING.typename !== 'window' && SELECTED_FOR_SETTING.typename !== 'door') {
+    if (SELECTED_FOR_SETTING.typename !== hClass.TYPE_FRIENDLY_NAME.SURFACE_PLANE && SELECTED_FOR_SETTING.typename !==
+        hClass.TYPE_FRIENDLY_NAME.WINDOW && SELECTED_FOR_SETTING.typename !== hClass.TYPE_FRIENDLY_NAME.DOOR) {
         errout('参数错误！', true);
         errout(SELECTED_FOR_SETTING.typename);
         return;
@@ -2910,7 +2871,7 @@ function starsBackground() {
     // var geo_stars = new THREE.SphereGeometry( STARS.width, STARS.segments, STARS.segments );
     var mat_stars = new THREE.MeshPhongMaterial( {color: 0xffffff, map: texture_stars, side: THREE.DoubleSide} );
     var stars = new THREE.Mesh( geo_stars, mat_stars );
-    stars.typename = 'background';
+    stars.typename = hClass.TYPE_FRIENDLY_NAME.BACKGROUND;
     scene.add(stars);
 }
 
@@ -2929,10 +2890,10 @@ function generateMathPlane(planeGeometry, mathPlane) {
         errout('mathPlane类型错误！');
     }
     switch (planeGeometry.typename) {
-        case 'floor':
+        case hClass.TYPE_FRIENDLY_NAME.FLOOR:
             mathPlane.setFromNormalAndCoplanarPoint(FLOOR_NORMAL_2, planeGeometry.position);
             break;
-        case 'wall':
+        case hClass.TYPE_FRIENDLY_NAME.WALL:
             if (planeGeometry.normalvector) {
                 // var planeNormal = new THREE.Vector3();
                 // planeNormal.copy(planeGeometry.normalvector);
@@ -2952,7 +2913,7 @@ function generateMathPlane(planeGeometry, mathPlane) {
                 return;
             }
             break;
-        case 'ceiling':
+        case hClass.TYPE_FRIENDLY_NAME.CEILING:
             mathPlane.setFromNormalAndCoplanarPoint(CEILING_NORMAL_2, planeGeometry.position);
             // errout('y=' + planeGeometry.position.y);
             break;
@@ -3123,5 +3084,6 @@ function toggleOverlayLayer(id) {
 }
 
 $('#background-overlay-layer').click(function () {
+    "use strict";
     errout('点击了覆盖层');
 });

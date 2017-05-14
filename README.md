@@ -6,11 +6,20 @@ interfaces to modify the furnishings and set theirs properties for developers.
 system is implemented by WebGL and Three.js.
 *   Got the first prize in the 14th Qilu Undergraduate Software Contest
 
+Developed by: Dapeng Xu, Tingting Liu, Xu Wang
+
+Models designed by: Ziyue Wang, Changxu Shao
+
 # 基于 WebGL 的 3D 智能家居设计系统
 *   实现了两大核心功能： 户型设计和家居布置。
 *   在轻量级的框架内，系统提供了面向用户的游览和设计视图，以及面向开发商的家具修改和属性设置接口。
 *   使用 JavaScript 编写，融合了多种前端技术，系统的图形部分使用 WebGL 和 Three.js 实现。
 *   获得齐鲁大学生软件大赛一等奖。
+
+代码编写：徐大鹏，刘婷婷，王旭
+
+模型设计：王子悦，邵长旭
+
 
 ### 文件目录说明
 *   js

@@ -87,3 +87,13 @@ div.items:hover {
     overflow-x: auto;
     overflow-y: auto;
 }
+
+
+
+#qilusoft_text {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    color: #006400;
+    font-style: italic;
+}

@@ -209,6 +209,52 @@ var hTools = function(){
 
 
 // --------------------------------------------------------------
+//                        弹出提示部分
+// --------------------------------------------------------------
+var popup = function() {    // open IIFE
+    "use strict";
+
+    // private attributes and methods
+    var jq;
+    var self;
+
+    // 是否显示页面弹出提示
+    var handle;
+
+    // public attributes and methods
+    var publicSet = {
+        // 在弹出提示中显示指定的文本
+        showPopup: function(text) {
+            if (popup) {
+                clearTimeout(popup);
+            }
+            jq.html(text);
+            jq.fadeIn(200);
+            handle = setTimeout(self.hidePopup, 2000);
+        },
+        // 隐藏弹出提示
+        hidePopup: function () {
+            jq.fadeOut(200);
+            handle = null;
+        },
+        initialize: function () {
+            jq = $('#popup_text');
+            self = window.popup;
+        },
+        getJQueryObject: function () {
+            return jq;
+        }
+    };
+
+    return publicSet;
+}();    // close IIFE
+popup.initialize();
+
+
+
+
+
+// --------------------------------------------------------------
 //                        侧边菜单部分
 // --------------------------------------------------------------
 var hMenu = function() {
@@ -553,7 +599,7 @@ var hEvent = function () {  // open IIFE
                             location = 'json/pagedata/obj-modify.json';
                             $.get(location, function (data, status) {
                                 if (status === 'success') {
-                                    showPopup('选中了家具');
+                                    popup.showPopup('选中了家具');
                                 } else {
                                     errout('获取JSON文件(' + location + ')失败', true);
                                 }
@@ -565,7 +611,7 @@ var hEvent = function () {  // open IIFE
                             location = 'json/pagedata/basicshape-modify.json';
                             $.get(location, function (data, status) {
                                 if (status === 'success') {
-                                    showPopup('成功获取JSON文件：' + location);
+                                    popup.showPopup('成功获取JSON文件：' + location);
                                 } else {
                                     errout('获取JSON文件(' + location + ')失败', true);
                                 }
@@ -581,7 +627,7 @@ var hEvent = function () {  // open IIFE
                                 location = 'json/pagedata/spotlight-modify.json';
                                 $.get(location, function (data, status) {
                                     if (status === 'success') {
-                                        showPopup('选中了聚光灯');
+                                        popup.showPopup('选中了聚光灯');
                                     } else {
                                         errout('获取JSON文件(' + location + ')失败', true);
                                     }
@@ -594,7 +640,7 @@ var hEvent = function () {  // open IIFE
                             location = 'json/pagedata/window-modify.json';
                             $.get(location, function (data, status) {
                                 if (status === 'success') {
-                                    showPopup('选中了窗户');
+                                    popup.showPopup('选中了窗户');
                                 } else {
                                     errout('获取JSON文件(' + location + ')失败', true);
                                 }
@@ -606,7 +652,7 @@ var hEvent = function () {  // open IIFE
                             location = 'json/pagedata/door-modify.json';
                             $.get(location, function (data, status) {
                                 if (status === 'success') {
-                                    showPopup('选中了门');
+                                    popup.showPopup('选中了门');
                                 } else {
                                     errout('获取JSON文件(' + location + ')失败', true);
                                 }
@@ -618,7 +664,7 @@ var hEvent = function () {  // open IIFE
                             location = 'json/pagedata/surfaceplane-modify.json';
                             $.get(location, function (data, status) {
                                 if (status === 'success') {
-                                    showPopup('选中了挂饰');
+                                    popup.showPopup('选中了挂饰');
                                 } else {
                                     errout('获取JSON文件(' + location + ')失败', true);
                                 }
@@ -687,7 +733,7 @@ var hEvent = function () {  // open IIFE
                 if (hEvent.objectCoordsMouseDown.sub(hRayCasting.SELECTED.position).length() > 20 * room.height) {
                     scene.remove(hRayCasting.SELECTED);
                     hRayCasting.SELECTED = null;
-                    showPopup('对象被过度拖动，为方便操作，系统将自动删除这个对象。');
+                    popup.showPopup('对象被过度拖动，为方便操作，系统将自动删除这个对象。');
                     return;
                 }
                 // 拖动完成，将hRayCasting.SELECTED置空。
@@ -1418,7 +1464,7 @@ var hCamera = function () { // open IIFE
             var i;
             // 设置状态量
             curType = (curType + 1) % TYPE.length;
-            showPopup('当前是' + this.getTypeName());
+            popup.showPopup('当前是' + this.getTypeName());
 
             // 在菜单中显示相机设置
             // loadSidePanel(this.getURL());
@@ -1735,8 +1781,9 @@ var hRender = function(){    // open IIFE
             $('#left_panel').width((100 - hMenu.widthPercent) + '%');
             $('#right_panel').width((hMenu.widthPercent) + '%');
             resizeOverlayLayer();
-            popupText.css('margin-top', (0.70 * window.innerHeight) + 'px');
-            popupText.css('left', (0.25 * window.innerWidth) + 'px');
+            var jqPopup = popup.getJQueryObject();
+            jqPopup.css('margin-top', (0.70 * window.innerHeight) + 'px');
+            jqPopup.css('left', (0.25 * window.innerWidth) + 'px');
             if (camera) {
                 hCamera.update();
             }
@@ -1943,7 +1990,7 @@ function loadJSON(location) {
     // 重要提醒：千万不要在JSON中使用双斜线添加注释，会导致jQuery无法加载对象，并且不调用回调函数的错误！！！
     $.get(location, function (data, status) {
         if (status === 'success') {
-            // showPopup('成功获取JSON文件：' + location);
+            // popup.showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -2042,19 +2089,13 @@ function loadSidePanel(location) {
     // 重要提醒：千万不要在JSON中使用双斜线添加注释，会导致jQuery无法加载对象，并且不调用回调函数的错误！！！
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功获取JSON文件：' + location);
+            popup.showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
         parseSidePanelPageData(data);
     });
 }
-
-
-
-
-
-var popupText = $('#popup_text');
 
 
 // TODO: 按照角度制旋转OBJ对象
@@ -2345,13 +2386,13 @@ function addObjectInMenu(supportingFace) {
     var i;
     // 如果不是支撑面，不能添加
     if (!isSupportingFace(supportingFace)) {
-        showPopup('您必须将家具添加到支撑平面上。');
+        popup.showPopup('您必须将家具添加到支撑平面上。');
         return;
     }
     // 如果定义了添加对象到哪一种平面，则执行判断
     if (SELECT_IN_MENU.supportingface) {
         if (supportingFace.typename !== eval(SELECT_IN_MENU.supportingface)) {
-            showPopup('您不能将家具放到这种平面上。');
+            popup.showPopup('您不能将家具放到这种平面上。');
             return ;
         }
     }
@@ -2588,7 +2629,7 @@ function loadUpdateFloorByColor() {
     var location = 'json/pagedata/floor-color.json';
     $.get(location, function (data, status) {
         if (status === 'success') {
-            // showPopup('成功获取JSON文件：' + location);
+            // popup.showPopup('成功获取JSON文件：' + location);
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -2610,7 +2651,7 @@ function loadUpdatePlaneByTexture(typename) {
     var location = 'json/pagedata/' + typename + '-texture.json';
     $.get(location, function (data, status) {
         if (status === 'success') {
-            showPopup('成功更换板材');
+            popup.showPopup('成功更换板材');
         } else {
             errout('获取JSON文件(' + location + ')失败', true);
         }
@@ -2637,13 +2678,13 @@ function loadModifyPlane(typename) {
         if (status === 'success') {
             switch(typename) {
                 case hClass.TYPE_FRIENDLY_NAME.FLOOR:
-                    showPopup('选中了地板');
+                    popup.showPopup('选中了地板');
                     break;
                 case hClass.TYPE_FRIENDLY_NAME.CEILING:
-                    showPopup('选中了天花板');
+                    popup.showPopup('选中了天花板');
                     break;
                 case hClass.TYPE_FRIENDLY_NAME.WALL:
-                    showPopup('选中了墙壁');
+                    popup.showPopup('选中了墙壁');
                     break;
             }
         } else {
@@ -2999,26 +3040,6 @@ function NumberBind(varToBind, min, max, step, precision, callback) {
         this.domElement.value = retVal;
         this._callback(this._value);
     };
-}
-
-// 是否显示页面弹出提示
-var popup;
-// 在弹出提示中显示指定的文本
-function showPopup(text) {
-    "use strict";
-    if (popup) {
-        clearTimeout(popup);
-    }
-    popupText.html(text);
-    popupText.fadeIn(200);
-    popup = setTimeout(hidePopup, 2000);
-}
-
-// 隐藏弹出提示
-function hidePopup() {
-    "use strict";
-    popupText.fadeOut(200);
-    popup = null;
 }
 
 // 覆盖层类型
